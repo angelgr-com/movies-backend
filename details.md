@@ -1,4 +1,8 @@
-# NPM
+# Basic MVC file structure
+
+## NPM
+
+
 
 ```bash
 npm init
@@ -31,7 +35,7 @@ Add in package.json (we will start server with 'npm run dev')
 "dev": "nodemon index.js",
 ```
 
-# index.js
+## index.js
 
 Import cors, express and router: 
 
@@ -55,7 +59,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 ```
 
-# router.js
+## router.js
 
 ```js
 const router = require('express').Router();
@@ -70,9 +74,9 @@ router.use('/orders', OrdersRouter);
 module.exports = router;
 ```
 
-# Views
+## Views
 
-## UsersRouter
+### UsersRouter
 
 ```js
 const express = require('express');
@@ -82,7 +86,7 @@ const UsersController = require('../controllers/UsersController');
 module.exports = router;
 ```
 
-## MoviesRouter
+### MoviesRouter
 
 ```js
 const express = require('express');
@@ -92,7 +96,7 @@ const MoviesController = require('../controllers/MoviesController');
 module.exports = router;
 ```
 
-## OrdersRouter
+### OrdersRouter
 
 ```js
 const express = require('express');
@@ -102,9 +106,9 @@ const OrdersController = require('../controllers/OrdersController');
 module.exports = router;
 ```
 
-# Controller
+## Controller
 
-UsersController
+### UsersController
 
 ```js
 const UsersController = {};
@@ -112,7 +116,7 @@ const UsersController = {};
 module.exports = UsersController;
 ```
 
-MoviesController
+### MoviesController
 
 ```js
 const MoviesController = {};
@@ -120,7 +124,7 @@ const MoviesController = {};
 module.exports = MoviesController;
 ```
 
-OrdersController
+### OrdersController
 
 ```js
 const OrdersController = {};
@@ -128,3 +132,88 @@ const OrdersController = {};
 module.exports = OrdersController;
 ```
 
+# Commit 2
+
+## index.js
+
+Start the server:
+
+```js
+const PORT = 3000;
+app.listen(PORT, ()=>{
+    console.log(`Server is listening on port ${PORT}`)
+});
+```
+
+## Views
+
+### UsersRouter
+
+```js
+```
+
+### MoviesRouter
+
+```js
+```
+### OrdersRouter
+
+```js
+```
+
+
+## Controllers
+
+### UsersController
+
+```js
+```
+
+### MoviesController
+
+```js
+```
+### OrdersController
+
+```js
+```
+
+# Commit N
+
+## index.js
+
+```js
+```
+
+## Views
+
+### UsersRouter
+
+```js
+```
+
+### MoviesRouter
+
+```js
+```
+### OrdersRouter
+
+```js
+```
+
+
+## Controllers
+
+### UsersController
+
+```js
+```
+
+### MoviesController
+
+```js
+```
+### OrdersController
+
+```js
+```

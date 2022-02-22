@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const router = require('./router');
+const PORT = 3000;
 
 // Middlewares
 let corsOptions = {
@@ -14,3 +15,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use(router);
+
+app.listen(PORT, ()=>{
+    console.log(`Server is listening on port ${PORT}`)
+});
