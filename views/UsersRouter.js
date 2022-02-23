@@ -12,6 +12,6 @@ router.get('/:username', UsersController.viewUser);
 router.delete('/:username', UsersController.deleteUser);
 
 // http://localhost:3000/users/login
-// router.post('/login', UsersController.login);
+router.post('/login', UsersController.login);
 
 module.exports = router;

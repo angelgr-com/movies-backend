@@ -198,18 +198,13 @@ const { User } = require('../models/index');
 
 UsersController.newUser = async (req, res) => {
     try {
-        let name = req.body.name;
-        let lastname = req.body.lastname;
-        let username = req.body.username;
-        let email = req.body.email;
-        let birthdate = req.body.birthdate;
-
         User.create({
-            name: name,
-            lastname: lastname,
-            username: username,
-            email: email,
-            birthdate: birthdate,
+            name: req.body.name,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            birthdate: req.body.birthdate,
         })
         .then(user => {
             console.log("New user created: ", user);
@@ -250,7 +245,7 @@ Add it to .gitignore as contains db password an make a copy as an example:
 Generate User model.
 
 ```
-sequelize model:generate --name User --attributes name:string,lastname:string,username:string,email:string,birthdate:dateonly
+sequelize model:generate --name User --attributes name:string,lastname:string,username:string,email:string,password:string,birthdate:dateonly
 ```
 
 It should return a message similar to:
@@ -334,6 +329,94 @@ UsersController.deleteUser = (req, res) => {
     }
 };
 ```
+
+
+
+# Add password field in User model
+
+### UsersController
+
+```js
+UsersController.newUser = (req, res) => {
+    try {
+        User.create({
+            name: req.body.name,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            birthdate: req.body.birthdate,
+        })
+        .then(user => {
+            console.log("New user created: ", user);
+	@@ -38,7 +33,7 @@ UsersController.viewUser = (req, res) => {
+    }
+};
+```
+
+# Encrypt password, JWT and add UsersController.login method
+
+### npm
+
+```
+npm i jsonwebtoken
+```
+
+### auth.js
+
+```js
+module.exports = {
+    secret: "",
+    expires: "",
+    rounds: 10
+}
+```
+
+### .gitignore
+
+```
+/config/auth.js
+```
+
+### UsersController
+
+```js
+const bcrypt = require('bcrypt');
+const authConfig = require('../config/auth');
+const jwt = require('jsonwebtoken');
+
+UsersController.login = (req, res) => {
+    User.findOne({
+        where : {email : req.body.email}
+    })
+    .then(User =>{
+        if (!User) {
+            res.send("Incorrect user or password");
+        } else {
+            if (bcrypt.compareSync(req.body.password, User.password)) {
+                console.log(req.body.password === User.password);
+
+                let token = jwt.sign({ user: User }, authConfig.secret, {
+                    expiresIn: authConfig.expires
+                });
+                res.json({
+                    user: User,
+                    token: token
+                })
+            } else {
+                res.status(401).json({ msg: "Incorrect user or password." });
+            }
+        }
+    })
+    .catch(error => {
+        res.send(error);
+    })
+};
+```
+
+
+
+### OrdersController
 
 # Commit N
 
