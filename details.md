@@ -1,6 +1,6 @@
 # Basic MVC file structure
 
-## NPM
+## npm
 
 
 
@@ -132,7 +132,7 @@ const OrdersController = {};
 module.exports = OrdersController;
 ```
 
-# Commit 2
+# Add users, movies and orders endpoints
 
 ## index.js
 
@@ -150,39 +150,215 @@ app.listen(PORT, ()=>{
 ### UsersRouter
 
 ```js
+// http://localhost:3000/users/
+router.post('/', UsersController.newUser);
+
+// http://localhost:3000/users/:user
+router.get('/:user', UsersController.viewUser);
+
+// http://localhost:3000/users/:user/delete
+router.delete('/:user/delete', UsersController.deleteUser);
+
+// http://localhost:3000/users/login
+router.post('/login', UsersController.login);
 ```
 
 ### MoviesRouter
 
 ```js
+router.get('/search/title/:title', MoviesController.searchByTitle);
+router.get('/search/id/:id', MoviesController.searchByID);
+router.get('/', MoviesController.getAllMovies);
+router.get('/filter/genre', MoviesController.filterByGenre);
+router.get('/filter/actors', MoviesController.filterByActors);
 ```
 ### OrdersRouter
 
 ```js
+// http://localhost:3000/orders/
+// one movie per user with rent and return date 
+router.post('/', OrdersController.newOrder);
+
+// http://localhost:3000/orders/
+router.get('/', OrdersController.showOrders);
+
+// http://localhost:3000/orders/id/
+router.get('/id/:id', OrdersController.showOrderByID);
 ```
 
+# Add OrdersController.newUser method
+
+## dotenv
+
+```
+npm install dotenv
+```
+
+Create a .env file in the root. Import and configure in app:
+
+```
+require('dotenv').config();
+console.log(process.env);
+```
+
+## db.js
+
+Sequelize database initialization, placed in config folder:
+
+```js
+require('dotenv').config(); // saves environment variables in process.env
+console.log(process.env);
+const config = require('./config/config.json');
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize(
+   process.env.DB_NAME || config.development.database, 
+   process.env.DB_USER || config.development.username, 
+   process.env.DB_PASSWORD || config.development.password,
+   {
+       host: process.env.DB_HOST || config.development.host,
+       port: process.env.DB_PORT || config.development.port,
+       dialect: 'mysql',
+       operatorAliases: false,
+       pool: {
+           max: 5,
+           min: 0,
+           acquire: 30000,
+           idle: 10000
+       },
+   }
+);
+module.exports = sequelize
+```
+
+## sequelize
+
+Execute in terminal:
+
+```js
+sequelize init
+```
+
+If we have not done it before, we will need:
+
+```
+npm i sequelize-cli -g
+npm init -y
+npm install express sequelize mysql2
+```
+
+Add database configuration in config/config.json.
+
+Add it to .gitignore as contains db password an make a copy as an example:
+
+```
+/config/config.json
+```
+
+Generate User model.
+
+```
+sequelize model:generate --name User --attributes name:string,lastname:string,email:string,birthdate:dateonly
+```
+
+It should return a message similar to:
+
+```
+New model was created at (...)\models\user.js .
+New migration was created at (...)\migrations\(...)-create-user.js
+```
+
+Create and migrate:
+
+```
+sequelize db:create
+sequelize db:migrate
+```
 
 ## Controllers
 
 ### UsersController
 
 ```js
+const UsersController = {};
+const { User } = require('../models/index');
+
+UsersController.newUser = async (req, res) => {
+    try {
+        let name = req.body.name;
+        let lastname = req.body.lastname;
+        let email = req.body.email;
+        let birthdate = req.body.birthdate;
+
+        User.create({
+            name: name,
+            lastname: lastname,
+            email: email,
+            birthdate: birthdate
+        })
+        .then(user => {
+            console.log("New user created: ", user);
+            res.send(`${user.name}, welcome`);
+        });
+    } catch (error) {
+        res.send(error);
+    }
+}
+
+
+module.exports = UsersController;
 ```
 
-### MoviesController
+Test it with postman:
 
-```js
-```
-### OrdersController
+POST:
 
-```js
 ```
+http://localhost:3000/users
+```
+
+Body:
+
+```
+{
+    "name": "John",
+    "lastName": "Doe",
+    "email": "john@doe.com",
+    "birthdate": "1950-01-01"
+}
+```
+
+Response:
+
+```
+John, welcome
+```
+
+
 
 # Commit N
 
-## index.js
+## npm
 
 ```js
+npm i dotenv
+```
+
+Add to .gitignore
+
+```
+.env
+```
+
+index.js
+
+```js
+```
+
+## router.js
+
+```js
+
 ```
 
 ## Views
