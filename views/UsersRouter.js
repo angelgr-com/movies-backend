@@ -9,7 +9,7 @@ router.post('/', UsersController.newUser);
 router.get('/:username', UsersController.viewUser);
 
 // http://localhost:3000/users/:user/delete
-// router.delete('/:user/delete', UsersController.deleteUser);
+router.delete('/:username', UsersController.deleteUser);
 
 // http://localhost:3000/users/login
 // router.post('/login', UsersController.login);

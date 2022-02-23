@@ -335,6 +335,64 @@ Add to .gitignore
 ### UsersRouter
 
 ```js
+
+```
+
+### MoviesRouter
+
+```js
+
+```
+
+### OrdersRouter
+
+```js
+
+```
+
+
+## Controllers
+
+### UsersController
+
+```js
+
+```
+
+### MoviesController
+
+```js
+
+```
+
+### OrdersController
+
+```
+```
+
+
+
+# Commit N
+
+## npm
+
+Add to .gitignore
+
+```
+
+```
+
+## router.js
+
+```js
+
+```
+
+## Views
+
+### UsersRouter
+
+```js
 ```
 
 ### MoviesRouter

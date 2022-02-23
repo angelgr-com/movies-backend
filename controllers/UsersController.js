@@ -38,4 +38,17 @@ UsersController.viewUser = (req, res) => {
     }
 };
 
+UsersController.deleteUser = async (req, res) => {
+    try {
+        User.destroy({
+            where : { username : req.params.username }
+        })
+        .then(removedUser => {
+            res.send(`User ${req.params.username} has been removed.`);
+        });
+    } catch (error) {
+        res.send(error);
+    }
+};
+
 module.exports = UsersController;
