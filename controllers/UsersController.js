@@ -1,20 +1,15 @@
 const UsersController = {};
 const { User } = require('../models/index');
 
-UsersController.newUser = async (req, res) => {
+UsersController.newUser = (req, res) => {
     try {
-        let name = req.body.name;
-        let lastname = req.body.lastname;
-        let username = req.body.username;
-        let email = req.body.email;
-        let birthdate = req.body.birthdate;
-
         User.create({
-            name: name,
-            lastname: lastname,
-            username: username,
-            email: email,
-            birthdate: birthdate,
+            name: req.body.name,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            birthdate: req.body.birthdate,
         })
         .then(user => {
             console.log("New user created: ", user);
@@ -38,7 +33,7 @@ UsersController.viewUser = (req, res) => {
     }
 };
 
-UsersController.deleteUser = async (req, res) => {
+UsersController.deleteUser = (req, res) => {
     try {
         User.destroy({
             where : { username : req.params.username }

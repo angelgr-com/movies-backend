@@ -157,7 +157,7 @@ router.post('/', UsersController.newUser);
 router.get('/:user', UsersController.viewUser);
 
 // http://localhost:3000/users/:user/delete
-router.delete('/:user/delete', UsersController.deleteUser);
+router.delete('/:username', UsersController.deleteUser);
 
 // http://localhost:3000/users/login
 router.post('/login', UsersController.login);
@@ -186,7 +186,7 @@ router.get('/', OrdersController.showOrders);
 router.get('/id/:id', OrdersController.showOrderByID);
 ```
 
-# Add OrdersController.newUser method
+# Add UsersController.newUser method
 
 ## Controllers
 
@@ -293,7 +293,7 @@ Response:
 John, welcome
 ```
 
-# Add OrdersController.viewUser method
+# Add UsersController.viewUser method
 
 ## Controllers
 
@@ -314,63 +314,26 @@ UsersController.viewUser = (req, res) => {
 };
 ```
 
-# Commit N
-
-## npm
-
-Add to .gitignore
-
-```
-
-```
-
-## router.js
-
-```js
-
-```
-
-## Views
-
-### UsersRouter
-
-```js
-
-```
-
-### MoviesRouter
-
-```js
-
-```
-
-### OrdersRouter
-
-```js
-
-```
-
+# Add UsersController.deleteUser method
 
 ## Controllers
 
 ### UsersController
 
 ```js
-
+UsersController.deleteUser = (req, res) => {
+    try {
+        User.destroy({
+            where : { username : req.params.username }
+        })
+        .then(removedUser => {
+            res.send(`User ${req.params.username} has been removed.`);
+        });
+    } catch (error) {
+        res.send(error);
+    }
+};
 ```
-
-### MoviesController
-
-```js
-
-```
-
-### OrdersController
-
-```
-```
-
-
 
 # Commit N
 
