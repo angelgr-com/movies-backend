@@ -188,47 +188,39 @@ router.get('/id/:id', OrdersController.showOrderByID);
 
 # Add OrdersController.newUser method
 
-## dotenv
+## Controllers
 
-```
-npm install dotenv
-```
-
-Create a .env file in the root. Import and configure in app:
-
-```
-require('dotenv').config();
-console.log(process.env);
-```
-
-## db.js
-
-Sequelize database initialization, placed in config folder:
+### UsersController
 
 ```js
-require('dotenv').config(); // saves environment variables in process.env
-console.log(process.env);
-const config = require('./config/config.json');
-const Sequelize = require('sequelize');
+const UsersController = {};
+const { User } = require('../models/index');
 
-const sequelize = new Sequelize(
-   process.env.DB_NAME || config.development.database, 
-   process.env.DB_USER || config.development.username, 
-   process.env.DB_PASSWORD || config.development.password,
-   {
-       host: process.env.DB_HOST || config.development.host,
-       port: process.env.DB_PORT || config.development.port,
-       dialect: 'mysql',
-       operatorAliases: false,
-       pool: {
-           max: 5,
-           min: 0,
-           acquire: 30000,
-           idle: 10000
-       },
-   }
-);
-module.exports = sequelize
+UsersController.newUser = async (req, res) => {
+    try {
+        let name = req.body.name;
+        let lastname = req.body.lastname;
+        let username = req.body.username;
+        let email = req.body.email;
+        let birthdate = req.body.birthdate;
+
+        User.create({
+            name: name,
+            lastname: lastname,
+            username: username,
+            email: email,
+            birthdate: birthdate,
+        })
+        .then(user => {
+            console.log("New user created: ", user);
+            res.send(`${user.name}, welcome`);
+        });
+    } catch (error) {
+        res.send(error);
+    }
+}
+
+module.exports = UsersController;
 ```
 
 ## sequelize
@@ -258,7 +250,7 @@ Add it to .gitignore as contains db password an make a copy as an example:
 Generate User model.
 
 ```
-sequelize model:generate --name User --attributes name:string,lastname:string,email:string,birthdate:dateonly
+sequelize model:generate --name User --attributes name:string,lastname:string,username:string,email:string,birthdate:dateonly
 ```
 
 It should return a message similar to:
@@ -275,41 +267,7 @@ sequelize db:create
 sequelize db:migrate
 ```
 
-## Controllers
-
-### UsersController
-
-```js
-const UsersController = {};
-const { User } = require('../models/index');
-
-UsersController.newUser = async (req, res) => {
-    try {
-        let name = req.body.name;
-        let lastname = req.body.lastname;
-        let email = req.body.email;
-        let birthdate = req.body.birthdate;
-
-        User.create({
-            name: name,
-            lastname: lastname,
-            email: email,
-            birthdate: birthdate
-        })
-        .then(user => {
-            console.log("New user created: ", user);
-            res.send(`${user.name}, welcome`);
-        });
-    } catch (error) {
-        res.send(error);
-    }
-}
-
-
-module.exports = UsersController;
-```
-
-Test it with postman:
+Test OrdersController.newUser method with postman:
 
 POST:
 
@@ -322,7 +280,8 @@ Body:
 ```
 {
     "name": "John",
-    "lastName": "Doe",
+    "lastname": "Doe",
+    "username": "johndoe",
     "email": "john@doe.com",
     "birthdate": "1950-01-01"
 }
@@ -334,25 +293,35 @@ Response:
 John, welcome
 ```
 
+# Add OrdersController.viewUser method
 
+## Controllers
+
+### UsersController
+
+```js
+UsersController.viewUser = (req, res) => {
+    try {      
+        User.findOne({
+            where : { username : req.params.username }
+        })
+        .then(data => {
+            res.send(data)
+        });
+    } catch (error) {
+        res.send(error);
+    }
+};
+```
 
 # Commit N
 
 ## npm
 
-```js
-npm i dotenv
-```
-
 Add to .gitignore
 
 ```
-.env
-```
 
-index.js
-
-```js
 ```
 
 ## router.js
