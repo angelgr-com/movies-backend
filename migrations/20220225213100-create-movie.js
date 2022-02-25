@@ -8,6 +8,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      tmdb_id: {
+        type: Sequelize.STRING
+      },
+      facebook_id: {
+        type: Sequelize.STRING
+      },
+      instagram_id: {
+        type: Sequelize.STRING
+      },
+      twitter_id: {
+        type: Sequelize.STRING
+      },
       popularity: {
         type: Sequelize.DECIMAL
       },
@@ -15,7 +27,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       release_date: {
-        type: Sequelize.STRING
+        type: Sequelize.DATEONLY
       },
       title: {
         type: Sequelize.STRING

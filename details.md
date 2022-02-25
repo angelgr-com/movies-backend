@@ -1,8 +1,6 @@
 # Basic MVC file structure
 
-## npm
-
-
+### npm
 
 ```bash
 npm init
@@ -35,7 +33,7 @@ Add in package.json (we will start server with 'npm run dev')
 "dev": "nodemon index.js",
 ```
 
-## index.js
+### index.js
 
 Import cors, express and router: 
 
@@ -59,7 +57,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 ```
 
-## router.js
+### router.js
 
 ```js
 const router = require('express').Router();
@@ -74,9 +72,9 @@ router.use('/orders', OrdersRouter);
 module.exports = router;
 ```
 
-## Views
+### Views
 
-### UsersRouter
+#### UsersRouter
 
 ```js
 const express = require('express');
@@ -86,7 +84,7 @@ const UsersController = require('../controllers/UsersController');
 module.exports = router;
 ```
 
-### MoviesRouter
+#### MoviesRouter
 
 ```js
 const express = require('express');
@@ -96,7 +94,7 @@ const MoviesController = require('../controllers/MoviesController');
 module.exports = router;
 ```
 
-### OrdersRouter
+#### OrdersRouter
 
 ```js
 const express = require('express');
@@ -106,9 +104,9 @@ const OrdersController = require('../controllers/OrdersController');
 module.exports = router;
 ```
 
-## Controller
+### Controller
 
-### UsersController
+#### UsersController
 
 ```js
 const UsersController = {};
@@ -116,7 +114,7 @@ const UsersController = {};
 module.exports = UsersController;
 ```
 
-### MoviesController
+#### MoviesController
 
 ```js
 const MoviesController = {};
@@ -124,7 +122,7 @@ const MoviesController = {};
 module.exports = MoviesController;
 ```
 
-### OrdersController
+#### OrdersController
 
 ```js
 const OrdersController = {};
@@ -132,9 +130,9 @@ const OrdersController = {};
 module.exports = OrdersController;
 ```
 
-# Add users, movies and orders endpoints
+### Add users, movies and orders endpoints
 
-## index.js
+### index.js
 
 Start the server:
 
@@ -145,9 +143,9 @@ app.listen(PORT, ()=>{
 });
 ```
 
-## Views
+### Views
 
-### UsersRouter
+#### UsersRouter
 
 ```js
 // http://localhost:3000/users/
@@ -163,7 +161,7 @@ router.delete('/:username', UsersController.deleteUser);
 router.post('/login', UsersController.login);
 ```
 
-### MoviesRouter
+#### MoviesRouter
 
 ```js
 router.get('/search/title/:title', MoviesController.searchByTitle);
@@ -172,7 +170,7 @@ router.get('/', MoviesController.getAllMovies);
 router.get('/filter/genre', MoviesController.filterByGenre);
 router.get('/filter/actors', MoviesController.filterByActors);
 ```
-### OrdersRouter
+#### OrdersRouter
 
 ```js
 // http://localhost:3000/orders/
@@ -186,11 +184,13 @@ router.get('/', OrdersController.showOrders);
 router.get('/id/:id', OrdersController.showOrderByID);
 ```
 
-# Add UsersController.newUser method
+# Users
 
-## Controllers
+## newUser
 
-### UsersController
+### Controllers
+
+#### UsersController
 
 ```js
 const UsersController = {};
@@ -218,7 +218,7 @@ UsersController.newUser = async (req, res) => {
 module.exports = UsersController;
 ```
 
-## sequelize
+### sequelize
 
 Execute in terminal:
 
@@ -288,11 +288,11 @@ Response:
 John, welcome
 ```
 
-# Add UsersController.viewUser method
+## viewUser
 
-## Controllers
+### Controllers
 
-### UsersController
+#### UsersController
 
 ```js
 UsersController.viewUser = (req, res) => {
@@ -309,11 +309,11 @@ UsersController.viewUser = (req, res) => {
 };
 ```
 
-# Add UsersController.deleteUser method
+## deleteUser
 
-## Controllers
+### Controllers
 
-### UsersController
+#### UsersController
 
 ```js
 UsersController.deleteUser = (req, res) => {
@@ -332,9 +332,9 @@ UsersController.deleteUser = (req, res) => {
 
 
 
-# Add password field in User model
+## Add password field in User model
 
-### UsersController
+#### UsersController
 
 ```js
 UsersController.newUser = (req, res) => {
@@ -354,15 +354,15 @@ UsersController.newUser = (req, res) => {
 };
 ```
 
-# Encrypt password, JWT and add UsersController.login method
+## Encrypt password, JWT and login method
 
-### npm
+#### npm
 
 ```
 npm i jsonwebtoken
 ```
 
-### auth.js
+#### auth.js
 
 ```js
 module.exports = {
@@ -372,13 +372,13 @@ module.exports = {
 }
 ```
 
-### .gitignore
+#### .gitignore
 
 ```
 /config/auth.js
 ```
 
-### UsersController
+#### UsersController
 
 ```js
 const bcrypt = require('bcrypt');
@@ -414,13 +414,119 @@ UsersController.login = (req, res) => {
 };
 ```
 
+# Movies
+
+## getTopRatedMovies
+
+### config
+
+config/TMDB.js
+
+```js
+module.exports = {
+    api_key: "",
+    language: "en-US"
+}
+```
+
+.gitignore
+
+```
+/config/TMDB.js
+```
 
 
-### OrdersController
+
+### Views
+
+#### MoviesRouter
+
+```js
+router.get('/tmdb/getTopRatedMovies', MoviesController.getTopRatedMovies);
+```
+
+### Controllers
+
+#### MoviesController
+
+```js
+const TMDB = require('../config/TMDB');
+const { default: axios } = require('axios');
+const { Movie } = require('../models/index');
+
+MoviesController.getTopRatedMovies = async (req, res) => {
+	// https://developers.themoviedb.org/3/movies/get-top-rated-movies
+    let results = await axios.get(`
+    https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=en-US&page=1`);
+    let array = [];
+    for (let i=0;i<20;i++){
+        Movie.create({
+            overview: results.data.results[i].overview,
+            popularity: results.data.results[i].popularity,
+            poster_path: results.data.results[i].poster_path,
+            release_date: results.data.results[i].release_date,
+            title: results.data.results[i].title,
+            video: results.data.results[i].video,
+            vote_average: results.data.results[i].vote_average,
+            vote_count: results.data.results[i].vote_count,
+            id_genre: null,
+            id_actor: null,
+        })
+        .then(movie => {
+            array.push(movie)
+        })
+        .catch((error) => {
+            res.send(error);
+        });
+    }
+    res.send(`New movies added: ${array}`);
+}
+```
+
+### sequelize
+
+Generate User model.
+
+```js
+sequelize model:generate --name Movie --attributes popularity:decimal,poster_path:string,release_date:dateonly,title:string,video:string,vote_average:decimal,vote_count:decimal,id_genre:integer,id_actor:integer
+```
+
+It should return a message similar to:
+
+```
+New model was created at (...)\models\movie.js .
+New migration was created at (...)\migrations\(...)-create-movie.js
+```
+
+Migrate:
+
+```
+sequelize db:migrate
+```
+
+Test OrdersController.newUser method with postman:
+
+GET:
+
+```
+http://localhost:3000/tmdb/getTopRatedMovies
+```
+
+Body:
+
+```
+
+```
+
+Response:
+
+```
+
+```
 
 # Commit N
 
-## npm
+### npm
 
 Add to .gitignore
 
@@ -428,41 +534,41 @@ Add to .gitignore
 
 ```
 
-## router.js
+### router.js
 
 ```js
 
 ```
 
-## Views
+### Views
 
-### UsersRouter
-
-```js
-```
-
-### MoviesRouter
-
-```js
-```
-### OrdersRouter
+#### UsersRouter
 
 ```js
 ```
 
+#### MoviesRouter
 
-## Controllers
-
-### UsersController
+```js
+```
+#### OrdersRouter
 
 ```js
 ```
 
-### MoviesController
+
+### Controllers
+
+#### UsersController
 
 ```js
 ```
-### OrdersController
+
+#### MoviesController
+
+```js
+```
+#### OrdersController
 
 ```js
 ```
