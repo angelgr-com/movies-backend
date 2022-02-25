@@ -69,4 +69,41 @@ MoviesController.addMovieByID = async (req, res) => {
     });
 }
 
+MoviesController.searchByTitle = async (req, res) => {
+    try {
+        // https://developers.themoviedb.org/3/search/search-movies
+        let results = await axios.get(`
+        https://api.themoviedb.org/3/search/movie?api_key=${TMDB.api_key}&query=${req.params.title}&language=${TMDB.language}&page=1&include_adult=false`);
+
+        res.send(results.data);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+MoviesController.searchByID = async (req, res) => {
+    let id = req.params.id;
+    try {
+        // https://developers.themoviedb.org/3/movies/get-movie-details
+        let results = await axios.get(`
+        https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+        res.send(results.data);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+MoviesController.getAllMovies = (req, res) => {
+    Movie.findAll()
+    .then(movies => {
+        if(movies != 0){
+            res.send(movies);
+        }else {
+            res.send(`There are no movies in the database.`);
+        }
+    }).catch(error => {
+        res.send(error);
+    });
+}
+
 module.exports = MoviesController;
