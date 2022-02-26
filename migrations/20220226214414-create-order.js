@@ -17,6 +17,9 @@ module.exports = {
       id_user: {
         type: Sequelize.INTEGER
       },
+      is_paid: {
+        type: Sequelize.BOOLEAN
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

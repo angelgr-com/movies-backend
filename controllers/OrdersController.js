@@ -3,7 +3,7 @@ const { Order } = require('../models/index');
 
 OrdersController.newOrder = (req, res) => {
 
-    const RENTAL_PERIOD = 2;
+    const RENTAL_PERIOD = 3;
     let rent_date = new Date();
     let return_date = new Date();
     const jsDateToSQL = (date) => {
@@ -26,11 +26,40 @@ OrdersController.newOrder = (req, res) => {
         rent_date: rent_date,
         return_date: return_date,
         id_user: req.body.id_user,
+        is_paid: req.body.is_paid,
     })
     .then(movie => {
         res.send(`User '${req.body.id_user}' has placed a new order.`);
     })
     .catch((error) => {
+        res.send(error);
+    });
+}
+
+OrdersController.showOrders = (req, res) => {
+    Order.findAll()
+    .then(orders => {
+        if(orders != 0){
+            res.send(orders);
+        }else {
+            res.send(`There are no orders in the database.`);
+        }
+    }).catch(error => {
+        res.send(error);
+    });
+}
+
+OrdersController.showOrderByID = (req, res) => {
+    Order.findOne({
+        where : { id : req.params.id }
+    })
+    .then(order => {
+        if(order != 0){
+            res.send(order);
+        }else {
+            res.send(`There are no orders with id ${req.params.id}.`);
+        }
+    }).catch(error => {
         res.send(error);
     });
 }

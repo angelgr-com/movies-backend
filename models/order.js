@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   Order.init({
     rent_date: DataTypes.DATEONLY,
     return_date: DataTypes.DATEONLY,
-    id_user: DataTypes.INTEGER
+    id_user: DataTypes.INTEGER,
+    is_paid: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Order',

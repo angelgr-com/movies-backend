@@ -626,12 +626,14 @@ MoviesController.getAllMovies = (req, res) => {
 
 # Orders
 
+## newOrder
+
 ### Views
 
 #### OrdersRouter
 
 ```js
-
+router.post('/', OrdersController.newOrder);
 ```
 
 ### Controllers
@@ -667,6 +669,7 @@ OrdersController.newOrder = (req, res) => {
         rent_date: rent_date,
         return_date: return_date,
         id_user: req.body.id_user,
+        is_paid: req.body.is_paid,
     })
     .then(movie => {
         res.send(`User '${req.body.id_user}' has placed a new order.`);
@@ -682,7 +685,7 @@ OrdersController.newOrder = (req, res) => {
 Generate User model.
 
 ```js
-sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer
+sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,is_paid:boolean
 ```
 
 It should return a message similar to:
@@ -696,6 +699,52 @@ Migrate:
 
 ```
 sequelize db:migrate
+```
+
+## showOrders and showOrdersByID
+
+### Views
+
+#### OrdersRouter
+
+```js
+router.get('/', OrdersController.showOrders);
+router.get('/id/:id', OrdersController.showOrderByID);
+```
+
+
+### Controller
+
+#### OrdersController
+
+```js
+OrdersController.showOrders = (req, res) => {
+    Order.findAll()
+    .then(orders => {
+        if(orders != 0){
+            res.send(orders);
+        }else {
+            res.send(`There are no orders in the database.`);
+        }
+    }).catch(error => {
+        res.send(error);
+    });
+}
+
+OrdersController.showOrderByID = (req, res) => {
+    Order.findOne({
+        where : { id : req.params.id }
+    })
+    .then(order => {
+        if(order != 0){
+            res.send(order);
+        }else {
+            res.send(`There are no orders with id ${req.params.id}.`);
+        }
+    }).catch(error => {
+        res.send(error);
+    });
+}
 ```
 
 

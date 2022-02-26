@@ -7,9 +7,9 @@ const OrdersController = require('../controllers/OrdersController');
 router.post('/', OrdersController.newOrder);
 
 // http://localhost:3000/orders/
-// router.get('/', OrdersController.showOrders);
+router.get('/', OrdersController.showOrders);
 
 // http://localhost:3000/orders/id/
-// router.get('/id/:id', OrdersController.showOrderByID);
+router.get('/id/:id', OrdersController.showOrderByID);
 
 module.exports = router;
