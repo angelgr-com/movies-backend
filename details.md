@@ -218,74 +218,47 @@ UsersController.newUser = async (req, res) => {
 module.exports = UsersController;
 ```
 
-### sequelize
+## newUserAPI
 
-Execute in terminal:
+### Controllers
+
+#### UsersController
 
 ```js
-sequelize init
-```
+UsersController.newUserAPI = async (req, res) => {
+    let userAPI = await axios.get(`https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}`);
+    const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
+    const randomInt = (min, max) => {
+        number = Math.floor(Math.random() * (max - min + 1) + min);
+        number < 10 ? number = `0${number}` : number;
+        return number;
+    }
+    let array = [];
 
-If we have not done it before, we will need:
-
-```
-npm i sequelize-cli -g
-npm init -y
-npm install express sequelize mysql2
-```
-
-Add database configuration in config/config.json.
-
-Add it to .gitignore as contains db password an make a copy as an example:
-
-```
-/config/config.json
-```
-
-Generate User model.
-
-```
-sequelize model:generate --name User --attributes name:string,lastname:string,username:string,email:string,password:string,birthdate:dateonly
-```
-
-It should return a message similar to:
-
-```
-New model was created at (...)\models\user.js .
-New migration was created at (...)\migrations\(...)-create-user.js
-```
-
-Create and migrate:
-
-```
-sequelize db:create
-sequelize db:migrate
-```
-
-Test OrdersController.newUser method with postman:
-
-POST:
-
-```
-http://localhost:3000/users
-```
-
-Body:
-
-```
-{
-    "name": "John",
-    "lastname": "Doe",
-    "username": "johndoe",
-    "email": "john@doe.com",
-    "birthdate": "1950-01-01"
-}
-```
-
-Response:
-
-```
-John, welcome
+    for (let i=0;i<10;i++){
+        birthdate = `${randomInt(1930,2006)}`+'-'+
+                    `${randomInt(1,12)}`+'-'+
+                    `${randomInt(1,28)}`;
+        city_random = city[Math.floor(Math.random() * 9) + 0];
+        User.create({
+            birthdate: birthdate,
+            city: city_random,
+            name: userAPI.data.data[i].name.firstname.name,
+            lastname: userAPI.data.data[i].name.lastname.name,
+            gender: userAPI.data.data[i].name.firstname.gender,
+            email: userAPI.data.data[i].email.address,
+            password: bcrypt.hashSync(userAPI.data.data[i].password, Number.parseInt(authConfig.rounds)),
+            username: userAPI.data.data[i].email.username,
+        })
+        .then(user => {
+            array.push(user);
+        }).catch((error) => {
+            // res.send(error);
+            console.log(error);
+        });
+    }
+    res.send(`${PARSER_RESULTS} new users created.`);
+};
 ```
 
 ## viewUser
@@ -492,37 +465,6 @@ MoviesController.getTopRatedMovies = async (req, res) => {
 }
 ```
 
-### sequelize
-
-Generate User model.
-
-```js
-sequelize model:generate --name Movie --attributes tmdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,title:string,video:string,vote_average:decimal,vote_count:decimal,id_genre:integer,id_actor:integer
-```
-
-It should return a message similar to:
-
-```
-New model was created at (...)\models\movie.js .
-New migration was created at (...)\migrations\(...)-create-movie.js
-```
-
-Migrate:
-
-```
-sequelize db:migrate
-```
-
-Test OrdersController.newUser method with postman:
-
-GET:
-
-```
-http://localhost:3000/tmdb/getTopRatedMovies
-```
-
-
-
 ## addMovieByID
 
 ### Views
@@ -682,55 +624,6 @@ OrdersController.newOrder = (req, res) => {
 }
 ```
 
-### sequelize
-
-Generate User model.
-
-```js
-sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,is_paid:boolean
-```
-
-Generate Copy model.
-
-```
-sequelize model:generate --name Copy --attributes id_order:integer,id_movie:integer
-```
-
-Migrate:
-
-```
-sequelize db:migrate
-```
-
-Define associations:
-
-- order.js:
-
-  ```
-  static associate(models) {
-        // define association here
-        this.belongsTo(models.User, {
-          foreignKey: 'id_user'
-        });
-      }
-  ```
-
-- copy.js:
-
-  ```js
-  static associate(models) {
-        // define association here
-        this.belongsTo(models.Order, {
-          foreignKey: 'id_order'
-        });
-        this.belongsTo(models.Movie, {
-          foreignKey: 'id_movie'
-        });
-      }
-  ```
-
-  
-
 ## showOrders and showOrdersByID
 
 ### Views
@@ -776,6 +669,222 @@ OrdersController.showOrderByID = (req, res) => {
     });
 }
 ```
+
+## showOrdersByCity
+
+### Views
+
+#### OrdersRouter
+
+```js
+// http://localhost:3000/orders/by/city
+router.get('/by/city/:city', OrdersController.showOrdersByCity);
+```
+
+
+### Controller
+
+#### OrdersController
+
+```js
+OrdersController.showOrdersByCity = async (req, res) => {
+    let query;
+    if (req.params.city) {
+        query = `
+    SELECT 
+      users.city AS City, 
+      users.name AS Name, 
+      users.lastname AS Lastname, 
+      orders.rent_date AS 'Rent date' 
+    FROM users 
+    INNER JOIN orders ON users.id = orders.id_user 
+    WHERE city = '${req.params.city}' 
+    ORDER BY City ASC
+    `;
+    } else {
+        query = `
+    SELECT 
+      users.city AS City, 
+      users.name AS Name, 
+      users.lastname AS Lastname, 
+      orders.rent_date AS 'Rent date' 
+    FROM users 
+    INNER JOIN orders ON users.id = orders.id_user 
+    ORDER BY City ASC
+    `;
+    }
+
+    let result = await Order.sequelize.query(query, {
+        type: Order.sequelize.QueryTypes.SELECT,
+    });
+
+    if (result) {
+        res.send(result);
+    }
+};
+```
+
+# Models
+
+## newUser
+
+Execute in terminal:
+
+```js
+sequelize init
+```
+
+If we have not done it before, we will need:
+
+```
+npm i sequelize-cli -g
+npm init -y
+npm install express sequelize mysql2
+```
+
+Add database configuration in config/config.json.
+
+Add it to .gitignore as contains db password an make a copy as an example:
+
+```
+/config/config.json
+```
+
+Generate User model.
+
+```
+sequelize model:generate --name User --attributes username:string,name:string,lastname:string,gender:string,birthdate:dateonly,email:string,password:string,city:string
+```
+
+It should return a message similar to:
+
+```
+New model was created at (...)\models\user.js .
+New migration was created at (...)\migrations\(...)-create-user.js
+```
+
+Create and migrate:
+
+```
+sequelize db:create
+sequelize db:migrate
+```
+
+## getTopRatedMovies
+
+Generate User model.
+
+```js
+sequelize model:generate --name Movie --attributes tmdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,title:string,video:string,vote_average:decimal,vote_count:decimal,id_genre:integer,id_actor:integer
+```
+
+It should return a message similar to:
+
+```
+New model was created at (...)\models\movie.js .
+New migration was created at (...)\migrations\(...)-create-movie.js
+```
+
+Migrate:
+
+```
+sequelize db:migrate
+```
+
+Test OrdersController.newUser method with postman:
+
+GET:
+
+```
+http://localhost:3000/tmdb/getTopRatedMovies
+```
+
+### newOrder
+
+Generate Order model.
+
+```js
+sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,is_paid:boolean
+```
+
+Generate Copy model.
+
+```
+sequelize model:generate --name Copy --attributes id_order:integer,id_movie:integer
+```
+
+Migrate:
+
+```
+sequelize db:migrate
+```
+
+Define associations:
+
+- order.js:
+
+  - In model:
+
+    ```js
+        static associate(models) {
+          // define association here
+          this.belongsTo(models.User, {
+            foreignKey: 'id_user'
+          });
+        }
+    ```
+
+  - In migration:
+
+    ```js
+          id_user: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+              model: 'User',
+              key: 'id'
+            }
+          },
+    ```
+
+- copy.js:
+
+  - In model:
+
+    ```js
+    static associate(models) {
+          // define association here
+          this.belongsTo(models.Order, {
+            foreignKey: 'id_order'
+          });
+          this.belongsTo(models.Movie, {
+            foreignKey: 'id_movie'
+          });
+        }
+    ```
+
+  - In migration:
+
+    ```js
+          id_order: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+              model: 'Orders',
+              key: 'id'
+            }
+          },
+          id_movie: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+              model: 'Movies',
+              key: 'id'
+            }
+          },
+    ```
+
+### 
 
 
 

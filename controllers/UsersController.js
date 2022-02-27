@@ -27,8 +27,8 @@ UsersController.newUser = (req, res) => {
 
 UsersController.newUserAPI = async (req, res) => {
     let userAPI = await axios.get(`https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}`);
-    // console.log(userAPI.data);
-    const city = ['València', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
+
+    const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
     const randomInt = (min, max) => {
         number = Math.floor(Math.random() * (max - min + 1) + min);
         number < 10 ? number = `0${number}` : number;
@@ -114,6 +114,5 @@ UsersController.login = (req, res) => {
         res.send(error);
     })
 };
-
 
 module.exports = UsersController;

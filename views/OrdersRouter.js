@@ -12,4 +12,7 @@ router.get('/', OrdersController.showOrders);
 // http://localhost:3000/orders/id/
 router.get('/id/:id', OrdersController.showOrderByID);
 
+// http://localhost:3000/orders/by/city
+router.get('/by/city/:city', OrdersController.showOrdersByCity);
+
 module.exports = router;
