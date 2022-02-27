@@ -772,7 +772,7 @@ sequelize db:migrate
 
 ## getTopRatedMovies
 
-Generate User model.
+Generate Movie model.
 
 ```js
 sequelize model:generate --name Movie --attributes tmdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,title:string,video:string,vote_average:decimal,vote_count:decimal,id_genre:integer,id_actor:integer

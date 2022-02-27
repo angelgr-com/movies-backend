@@ -31,7 +31,7 @@ MoviesController.getTopRatedMovies = async (req, res) => {
             id_actor: null,
         })
         .then(movie => {
-            array.push(movie)
+            array.push(movie);
         })
         .catch((error) => {
             res.send(error);
