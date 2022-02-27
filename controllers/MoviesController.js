@@ -2,11 +2,13 @@ const MoviesController = {};
 const TMDB = require('../config/TMDB');
 const { default: axios } = require('axios');
 const { Movie } = require('../models/index');
+let page = 1;
 
 MoviesController.getTopRatedMovies = async (req, res) => {
 	// https://developers.themoviedb.org/3/movies/get-top-rated-movies
     let results = await axios.get(`
-    https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=${TMDB.language}&page=1`);
+    https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=${TMDB.language}&page=${page}`);
+    page++;
     let array = [];
     for (let i=0;i<20;i++){
         let tmdbID = results.data.results[i].id;

@@ -3,6 +3,9 @@ const { User } = require('../models/index');
 const bcrypt = require('bcrypt');
 const authConfig = require('../config/auth');
 const jwt = require('jsonwebtoken');
+const { default: axios } = require('axios');
+const parsername = require('../config/parsername');
+const PARSER_RESULTS = 10;
 
 UsersController.newUser = (req, res) => {
     try {
@@ -20,6 +23,42 @@ UsersController.newUser = (req, res) => {
     } catch (error) {
         res.send(error);
     }
+};
+
+UsersController.newUserAPI = async (req, res) => {
+    let userAPI = await axios.get(`https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}`);
+    // console.log(userAPI.data);
+    const city = ['València', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
+    const randomInt = (min, max) => {
+        number = Math.floor(Math.random() * (max - min + 1) + min);
+        number < 10 ? number = `0${number}` : number;
+        return number;
+    }
+    let array = [];
+
+    for (let i=0;i<10;i++){
+        birthdate = `${randomInt(1930,2006)}`+'-'+
+                    `${randomInt(1,12)}`+'-'+
+                    `${randomInt(1,28)}`;
+        city_random = city[Math.floor(Math.random() * 9) + 0];
+        User.create({
+            birthdate: birthdate,
+            city: city_random,
+            name: userAPI.data.data[i].name.firstname.name,
+            lastname: userAPI.data.data[i].name.lastname.name,
+            gender: userAPI.data.data[i].name.firstname.gender,
+            email: userAPI.data.data[i].email.address,
+            password: bcrypt.hashSync(userAPI.data.data[i].password, Number.parseInt(authConfig.rounds)),
+            username: userAPI.data.data[i].email.username,
+        })
+        .then(user => {
+            array.push(user);
+        }).catch((error) => {
+            // res.send(error);
+            console.log(error);
+        });
+    }
+    res.send(`${PARSER_RESULTS} new users created.`);
 };
 
 UsersController.viewUser = (req, res) => {

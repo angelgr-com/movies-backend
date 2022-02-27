@@ -5,6 +5,9 @@ const UsersController = require('../controllers/UsersController');
 // http://localhost:3000/users/
 router.post('/', UsersController.newUser);
 
+// http://localhost:3000/users/
+router.get('/', UsersController.newUserAPI);
+
 // http://localhost:3000/users/:username
 router.get('/:username', UsersController.viewUser);
 

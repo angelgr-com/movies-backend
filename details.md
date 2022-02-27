@@ -453,11 +453,13 @@ router.get('/tmdb/getTopRatedMovies', MoviesController.getTopRatedMovies);
 const TMDB = require('../config/TMDB');
 const { default: axios } = require('axios');
 const { Movie } = require('../models/index');
+let page = 1;
 
 MoviesController.getTopRatedMovies = async (req, res) => {
 	// https://developers.themoviedb.org/3/movies/get-top-rated-movies
     let results = await axios.get(`
-    https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=en-US&page=1`);
+    https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=en-US&page=${page}`);
+    page++;
     let array = [];
     for (let i=0;i<20;i++){
         let tmdbID = results.data.results[i].id;
@@ -688,11 +690,10 @@ Generate User model.
 sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,is_paid:boolean
 ```
 
-It should return a message similar to:
+Generate Copy model.
 
 ```
-New model was created at (...)\models\movie.js .
-New migration was created at (...)\migrations\(...)-create-movie.js
+sequelize model:generate --name Copy --attributes id_order:integer,id_movie:integer
 ```
 
 Migrate:
@@ -700,6 +701,35 @@ Migrate:
 ```
 sequelize db:migrate
 ```
+
+Define associations:
+
+- order.js:
+
+  ```
+  static associate(models) {
+        // define association here
+        this.belongsTo(models.User, {
+          foreignKey: 'id_user'
+        });
+      }
+  ```
+
+- copy.js:
+
+  ```js
+  static associate(models) {
+        // define association here
+        this.belongsTo(models.Order, {
+          foreignKey: 'id_order'
+        });
+        this.belongsTo(models.Movie, {
+          foreignKey: 'id_movie'
+        });
+      }
+  ```
+
+  
 
 ## showOrders and showOrdersByID
 
