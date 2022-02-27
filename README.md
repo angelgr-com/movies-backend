@@ -22,30 +22,30 @@ A server-side web API (*application programming interface*) for a video store cr
 - 🧩 It also, in turn, makes calls to two APIs:
 
   - **The Movie Database (TMDB)** (https://www.themoviedb.org/) -> to obtain movie data.
-    	![tmdb](assets\tmdb.gif)
+    	![tmdb](assets/tmdb.gif)
 
   - **Name parser** (https://parser.name/) -> to generate fictitious user names.
 
-    ​	![name.parser](assets\nameparser.gif)
+    ​	![name.parser](assets/nameparser.gif)
 
 - 🎬 It recreates the **functionality** used by a **video store** to lend copies of movies to its customers.
 
-  ![db-workbench](assets\db_workbench.jpg)
+  ![db-workbench](assets/db_workbench.jpg)
 
 ## Technologies
 
 - Javascript ES6, Node.js, Express.js
-  			![nodejs](assets\nodejs.gif)
-    		![expressjs](assets\expressjs.gif)
+  			![nodejs](assets/nodejs.gif)
+    		![expressjs](assets/expressjs.gif)
 
 - JSON Web Tokens, Sequelize ORM, SQL
 
-  ​		![sequelize](assets\sequelizejs.gif)
-  ​		![jwt](assets\jwt.gif)
+  ​		![sequelize](assets/sequelizejs.gif)
+  ​		![jwt](assets/jwt.gif)
 
 - Postman to test the API endpoints
 
-  ​		![postman](assets\postman.gif)
+  ​		![postman](assets/postman.gif)
 
 ## API endpoints
 
