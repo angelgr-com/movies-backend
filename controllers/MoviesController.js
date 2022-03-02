@@ -2,15 +2,15 @@ const MoviesController = {};
 const TMDB = require('../config/TMDB');
 const { default: axios } = require('axios');
 const { Movie } = require('../models/index');
-let page = 1;
 
-MoviesController.getTopRatedMovies = async (req, res) => {
+// router.get('/add', MoviesController.saveTopRatedMovies);
+// Every time saves one different page (20 movies) from TMDB's top rated movies
+let page = 1;
+MoviesController.saveTopRatedMovies = async (req, res) => {
 	// https://developers.themoviedb.org/3/movies/get-top-rated-movies
     let results = await axios.get(`
     https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=${TMDB.language}&page=${page}`);
     page++;
-
-
 
     let array = [];
     for (let i=0;i<20;i++){
@@ -18,6 +18,7 @@ MoviesController.getTopRatedMovies = async (req, res) => {
         // https://developers.themoviedb.org/3/movies/get-movie-external-ids
         let externalIDs = await axios.get(`https://api.themoviedb.org/3/movie/${tmdbID}/external_ids?api_key=${TMDB.api_key}&`);
         Movie.create({
+            title: results.data.results[i].title,
             tmdb_id: tmdbID,
             imdb_id: externalIDs.data.imdb_id,
             facebook_id: externalIDs.data.facebook_id,
@@ -26,12 +27,9 @@ MoviesController.getTopRatedMovies = async (req, res) => {
             popularity: results.data.results[i].popularity,
             poster_path: results.data.results[i].poster_path,
             release_date: results.data.results[i].release_date,
-            title: results.data.results[i].title,
             video: results.data.results[i].video,
             vote_average: results.data.results[i].vote_average,
             vote_count: results.data.results[i].vote_count,
-            id_genre: null,
-            id_actor: null,
         })
         .then(movie => {
             array.push(movie);
@@ -43,7 +41,7 @@ MoviesController.getTopRatedMovies = async (req, res) => {
     res.send(`Top rated movies added.`);
 }
 
-MoviesController.addMovieByID = async (req, res) => {
+MoviesController.saveMovieByID = async (req, res) => {
     let tmdbID = req.params.id;
     // https://developers.themoviedb.org/3/movies/get-movie-details
     let results = await axios.get(`
@@ -63,8 +61,6 @@ MoviesController.addMovieByID = async (req, res) => {
         video: results.data.video,
         vote_average: results.data.vote_average,
         vote_count: results.data.vote_count,
-        id_genre: null,
-        id_actor: null,
     })
     .then(movie => {
         res.send(`"${results.data.title}" movie added to the database.`);
