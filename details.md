@@ -777,8 +777,6 @@ Define associations:
       }
   ```
 
-  
-
 - In migration admin:
 
   ```js
