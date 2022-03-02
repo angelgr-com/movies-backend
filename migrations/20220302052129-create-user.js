@@ -1,51 +1,41 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Movies', {
+    await queryInterface.createTable('Users', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      tmdb_id: {
+      username: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      name: {
         type: Sequelize.STRING
       },
-      facebook_id: {
+      lastname: {
         type: Sequelize.STRING
       },
-      instagram_id: {
+      gender: {
         type: Sequelize.STRING
       },
-      twitter_id: {
-        type: Sequelize.STRING
-      },
-      popularity: {
-        type: Sequelize.DECIMAL
-      },
-      poster_path: {
-        type: Sequelize.STRING
-      },
-      release_date: {
+      birthdate: {
         type: Sequelize.DATEONLY
       },
-      title: {
+      city: {
         type: Sequelize.STRING
       },
-      video: {
-        type: Sequelize.STRING
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
       },
-      vote_average: {
-        type: Sequelize.DECIMAL
-      },
-      vote_count: {
-        type: Sequelize.DECIMAL
-      },
-      id_genre: {
-        type: Sequelize.INTEGER
-      },
-      id_actor: {
-        type: Sequelize.INTEGER
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -58,6 +48,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Movies');
+    await queryInterface.dropTable('Users');
   }
 };

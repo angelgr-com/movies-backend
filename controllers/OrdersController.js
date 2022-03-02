@@ -68,6 +68,7 @@ OrdersController.showOrderByID = (req, res) => {
 OrdersController.showOrdersByCity = async (req, res) => {
     let query;
     if (req.params.city) {
+        console.log('req.params.city = ', req.params.city);
         query = `
     SELECT 
       users.city AS City, 

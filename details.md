@@ -726,7 +726,7 @@ OrdersController.showOrdersByCity = async (req, res) => {
 
 # Models
 
-## newUser
+## sequelize init
 
 Execute in terminal:
 
@@ -750,18 +750,211 @@ Add it to .gitignore as contains db password an make a copy as an example:
 /config/config.json
 ```
 
-Generate User model.
+## User
 
 ```
-sequelize model:generate --name User --attributes username:string,name:string,lastname:string,gender:string,birthdate:dateonly,email:string,password:string,city:string
+sequelize model:generate --name User --attributes username:string,name:string,lastname:string,gender:string,birthdate:dateonly,city:string,email:string,password:string
 ```
 
-It should return a message similar to:
+## Admin
+
+Generate Admin model.
 
 ```
-New model was created at (...)\models\user.js .
-New migration was created at (...)\migrations\(...)-create-user.js
+sequelize model:generate --name Admin --attributes id_user:integer
 ```
+
+Define associations:
+
+- In model admin.js:
+
+  ```
+      static associate(models) {
+        // define association here
+        this.belongsTo(models.User, {
+            foreignKey: 'id_user'
+        });
+      }
+  ```
+
+  
+
+- In migration admin:
+
+  ```js
+        id_user: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'Users',
+              key: 'id'
+          }
+        },
+  ```
+
+## Movie
+
+Generate Movie model.
+
+```js
+sequelize model:generate --name Movie --attributes title:string,tmdb_id:string,imdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,video:string,vote_average:decimal,vote_count:decimal
+```
+
+## Order
+
+Generate Order model.
+
+```js
+sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,is_paid:boolean,id_user:integer,id_movie:integer
+```
+
+Define associations:
+
+- In model order.js:
+
+  ```js
+      static associate(models) {
+        // define association here
+        this.belongsTo(models.User, {
+            foreignKey: 'id_user'
+        });
+        this.belongsTo(models.Movie, {
+            foreignKey: 'id_movie'
+        });
+      }
+  ```
+
+- In migration order:
+
+  ```js
+        id_user: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Users',
+            key: 'id'
+          }
+        },
+        id_movie: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Movies',
+            key: 'id'
+          }
+        },
+  ```
+
+## Genre
+
+Generate Genre model.
+
+TMDB's genre list:
+
+https://developers.themoviedb.org/3/genres/get-movie-list
+
+```js
+sequelize model:generate --name Genre --attributes id_tmdb:integer,name:string
+```
+
+## Actor
+
+Generate Actor model.
+
+```
+sequelize model:create --name Actor --attributes name:string,birthday:dateonly,place_of_birth:string,biography:text,img:string
+```
+
+## MovieGenre
+
+Generate MovieGenre model.
+
+```
+sequelize model:generate --name MovieGenre --attributes id_movie:integer,id_genre:integer
+```
+
+Define associations:
+
+- In model moviegenre.js:
+
+  ```js
+      static associate(models) {
+        // define association here
+        this.belongsTo(models.Movie, {
+            foreignKey: 'id_movie'
+        });
+        this.belongsTo(models.Genre, {
+            foreignKey: 'id_genre'
+        });
+  ```
+
+- In migration:
+
+  ```js
+        id_movie: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'Movies',
+              key: 'id'
+          }
+        },
+        id_genre: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'Genres',
+              key: 'id'
+          }
+        },
+  ```
+
+## MovieActor
+
+Generate MovieActor model.
+
+```js
+sequelize model:generate --name MovieActor --attributes id_movie:integer,id_actor:integer
+```
+
+Define associations:
+
+- In model movieactor.js:
+
+  ```js
+      static associate(models) {
+        // define association here
+        this.belongsTo(models.Movie, {
+          foreignKey: 'id_movie'
+        });
+        this.belongsTo(models.Actor, {
+          foreignKey: 'id_actor'
+        });
+      }
+  ```
+
+- In migration:
+
+  ```js
+        id_movie: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'Movies',
+              key: 'id'
+          }
+        },
+        id_actor: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'Actors',
+              key: 'id'
+          }
+        },
+  ```
+
+## sequelize create and migrate
 
 Create and migrate:
 
@@ -769,124 +962,6 @@ Create and migrate:
 sequelize db:create
 sequelize db:migrate
 ```
-
-## getTopRatedMovies
-
-Generate Movie model.
-
-```js
-sequelize model:generate --name Movie --attributes tmdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,title:string,video:string,vote_average:decimal,vote_count:decimal,id_genre:integer,id_actor:integer
-```
-
-It should return a message similar to:
-
-```
-New model was created at (...)\models\movie.js .
-New migration was created at (...)\migrations\(...)-create-movie.js
-```
-
-Migrate:
-
-```
-sequelize db:migrate
-```
-
-Test OrdersController.newUser method with postman:
-
-GET:
-
-```
-http://localhost:3000/tmdb/getTopRatedMovies
-```
-
-### newOrder
-
-Generate Order model.
-
-```js
-sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,is_paid:boolean
-```
-
-Generate Copy model.
-
-```
-sequelize model:generate --name Copy --attributes id_order:integer,id_movie:integer
-```
-
-Migrate:
-
-```
-sequelize db:migrate
-```
-
-Define associations:
-
-- order.js:
-
-  - In model:
-
-    ```js
-        static associate(models) {
-          // define association here
-          this.belongsTo(models.User, {
-            foreignKey: 'id_user'
-          });
-        }
-    ```
-
-  - In migration:
-
-    ```js
-          id_user: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-              model: 'User',
-              key: 'id'
-            }
-          },
-    ```
-
-- copy.js:
-
-  - In model:
-
-    ```js
-    static associate(models) {
-          // define association here
-          this.belongsTo(models.Order, {
-            foreignKey: 'id_order'
-          });
-          this.belongsTo(models.Movie, {
-            foreignKey: 'id_movie'
-          });
-        }
-    ```
-
-  - In migration:
-
-    ```js
-          id_order: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-              model: 'Orders',
-              key: 'id'
-            }
-          },
-          id_movie: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: {
-              model: 'Movies',
-              key: 'id'
-            }
-          },
-    ```
-
-### 
-
-
 
 # Commit N
 

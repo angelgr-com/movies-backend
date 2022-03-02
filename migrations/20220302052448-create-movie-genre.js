@@ -1,29 +1,28 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Orders', {
+    await queryInterface.createTable('MovieGenres', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      rent_date: {
-        type: Sequelize.DATEONLY
-      },
-      return_date: {
-        type: Sequelize.DATEONLY
-      },
-      id_user: {
+      id_movie: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Users',
-          key: 'id'
+            model: 'Movies',
+            key: 'id'
         }
       },
-      is_paid: {
-        type: Sequelize.BOOLEAN
+      id_genre: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Genres',
+            key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -36,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Orders');
+    await queryInterface.dropTable('MovieGenres');
   }
 };

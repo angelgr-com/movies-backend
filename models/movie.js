@@ -14,19 +14,18 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Movie.init({
+    title: DataTypes.STRING,
     tmdb_id: DataTypes.STRING,
+    imdb_id: DataTypes.STRING,
     facebook_id: DataTypes.STRING,
     instagram_id: DataTypes.STRING,
     twitter_id: DataTypes.STRING,
     popularity: DataTypes.DECIMAL,
     poster_path: DataTypes.STRING,
     release_date: DataTypes.DATEONLY,
-    title: DataTypes.STRING,
     video: DataTypes.STRING,
     vote_average: DataTypes.DECIMAL,
-    vote_count: DataTypes.DECIMAL,
-    id_genre: DataTypes.INTEGER,
-    id_actor: DataTypes.INTEGER
+    vote_count: DataTypes.DECIMAL
   }, {
     sequelize,
     modelName: 'Movie',

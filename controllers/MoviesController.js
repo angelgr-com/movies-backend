@@ -9,6 +9,9 @@ MoviesController.getTopRatedMovies = async (req, res) => {
     let results = await axios.get(`
     https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=${TMDB.language}&page=${page}`);
     page++;
+
+
+
     let array = [];
     for (let i=0;i<20;i++){
         let tmdbID = results.data.results[i].id;
@@ -33,7 +36,7 @@ MoviesController.getTopRatedMovies = async (req, res) => {
         .then(movie => {
             array.push(movie);
         })
-        .catch((error) => {
+        .catch(error => {
             res.send(error);
         });
     }
