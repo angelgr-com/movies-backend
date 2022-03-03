@@ -2,6 +2,7 @@ const MoviesController = {};
 const TMDB = require('../config/TMDB');
 const { default: axios } = require('axios');
 const { Movie } = require('../models/index');
+const { Genre } = require('../models/index');
 let page = 1;
 
 // Every time saves one different page (20 movies) from TMDB's top rated movies
@@ -52,12 +53,15 @@ MoviesController.saveMovieByID = async (req, res) => {
     // https://developers.themoviedb.org/3/movies/get-movie-details
     let results = await axios.get(`
     https://api.themoviedb.org/3/movie/${req.params.id}?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+    
     // https://developers.themoviedb.org/3/movies/get-movie-external-ids
-    let externalIDs = await axios.get(`https://api.themoviedb.org/3/movie/${req.params.id}/external_ids?api_key=${TMDB.api_key}&`);
+    let externalIDs = await axios.get(`
+    https://api.themoviedb.org/3/movie/${req.params.id}/external_ids?api_key=${TMDB.api_key}&`);
 
     Movie.findOne({
         where : { tmdb_id: req.params.id }
-    }).then(movie => {
+    })
+    .then(movie => {
         if(movie != null) {
             res.send('The movie is already in the database');
         } else {
@@ -120,6 +124,50 @@ MoviesController.getAllMovies = (req, res) => {
             res.send(`There are no movies in the database.`);
         }
     }).catch(error => {
+        res.send(error);
+    });
+}
+
+MoviesController.getGenres = async (req, res) => {
+    let results = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+
+    const saveGenres = () => {
+        for(let i=0; i<results.data.genres.length; i++) {
+            Genre.create({
+                id_tmdb: results.data.genres[i].id,
+                name: results.data.genres[i].name,
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        }
+    };
+    
+    Genre.findOne({
+        where : { id_tmdb : results.data.genres[0].id }
+    })
+    .then(genre => {
+        if (genre != null) {
+            Genre.findAll()
+            .then(() => {
+                Genre.findAll()
+                .then(genres => {
+                    if(genres != 0){
+                        res.send(genres);
+                    }else {
+                        // res.send(`There are no movies in the database.`);
+                    }
+                })
+            })
+            .catch(error => {
+                res.send(error);
+            });
+        } else {
+            saveGenres();
+            res.send(`Genres added to the database.`)
+        }
+    })
+    .catch(error => {
         res.send(error);
     });
 }

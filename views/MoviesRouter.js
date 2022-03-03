@@ -13,6 +13,9 @@ router.get('/add/:id', MoviesController.saveMovieByID);
 // http://localhost:5000/movies/search?id="619264"&title="the king's man"
 router.get('/search', MoviesController.search);
 
+router.get('/genres', MoviesController.getGenres);
+// router.get('/actors', MoviesController.getActors);
+
 // router.get('/filter/genre', MoviesController.filterByGenre);
 // router.get('/filter/actors', MoviesController.filterByActors);
 
