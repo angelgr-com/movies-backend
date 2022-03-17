@@ -5,8 +5,11 @@ const UsersController = require('../controllers/UsersController');
 // http://localhost:3000/users/
 router.post('/', UsersController.newUser);
 
-// http://localhost:3000/users/
-router.get('/', UsersController.newUserAPI);
+// http://localhost:3000/users/API
+router.post('/', UsersController.newUsersAPI);
+
+// http://localhost:3000/users/GH/
+router.post('/', UsersController.newGhUsers);
 
 // http://localhost:3000/users/:username
 router.get('/:username', UsersController.viewUser);
