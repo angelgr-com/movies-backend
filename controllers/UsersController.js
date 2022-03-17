@@ -6,9 +6,10 @@ const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
 const parsername = require('../config/parsername');
 const PARSER_RESULTS = 10;
-import {ghUsers, randomInt, newBirthdate} from '../config/ghUsers';
+const data = require('../config/ghUsers');
+let ghUsers = data.ghUsers;
 
-UsuarioController.viewAllUsers = (req, res) => {
+UsersController.viewAllUsers = (req, res) => {
   Usuario.findAll()
   .then(data => {
     res.send(data)
