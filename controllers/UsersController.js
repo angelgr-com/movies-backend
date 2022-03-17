@@ -1,5 +1,7 @@
 const UsersController = {};
 const { User } = require('../models/index');
+const { Op } = require("sequelize");
+const { v4: uuidv4 } = require('uuid');
 const authConfig = require('../config/auth');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -10,7 +12,7 @@ const data = require('../config/ghUsers');
 let ghUsers = data.ghUsers;
 
 UsersController.viewAllUsers = (req, res) => {
-  Usuario.findAll()
+  User.findAll()
   .then(data => {
     res.send(data)
   });
@@ -44,7 +46,7 @@ const newBirthdate = () => `
 
 // Arrow function to check if user exists
 const userExists = (email, username) => {
-  Usuario.findAll({
+  User.findAll({
     where : {
       [Op.or] : [
         {
@@ -83,6 +85,7 @@ UsersController.newUser = (req, res) => {
   else {
     try {
       User.create({
+        id: uuidv4(),
         name: req.body.name,
         username: req.body.username,
         email: req.body.email,
@@ -122,6 +125,7 @@ UsersController.newUsersAPI = async (req, res) => {
       randomCity = city[Math.floor(Math.random() * 9) + 0];
 
       User.create({
+        id: uuidv4(),
         name: userAPI.data.data[i].name.firstname.name,
         username: userAPI.data.data[i].email.username,
         email: userAPI.data.data[i].email.address,
@@ -159,6 +163,7 @@ UsersController.newGhUsers = async (req, res) => {
                   `${randomInt(1,28)}`;
       randomCity = city[Math.floor(Math.random() * 9) + 0];
       User.create({
+        id: uuidv4(),
         name: ghUsers[i].name,
         username: ghUsers[i].username,
         email: ghUsers[i].email,
