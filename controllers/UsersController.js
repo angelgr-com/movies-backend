@@ -1,64 +1,75 @@
 const UsersController = {};
 const { User } = require('../models/index');
-const bcrypt = require('bcrypt');
 const authConfig = require('../config/auth');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
 const parsername = require('../config/parsername');
 const PARSER_RESULTS = 10;
 
+const randomInt = (min, max) => {
+  number = Math.floor(Math.random() * (max - min + 1) + min);
+  number < 10 ? number = `0${number}` : number;
+  return number;
+}
+
+const newBirthdate = () => `
+  ${randomInt(1930,2006)}-
+  ${randomInt(1,12)}-
+  ${randomInt(1,28)}
+`;
+
 UsersController.newUser = (req, res) => {
-    try {
-        User.create({
-            name: req.body.name,
-            lastname: req.body.lastname,
-            username: req.body.username,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, Number.parseInt(authConfig.rounds)),
-            birthdate: req.body.birthdate,
-        })
-        .then(user => {
-            res.send(`New user created. ${user.name}, welcome.`);
-        });
-    } catch (error) {
-        res.send(error);
-    }
+
+  const birthdate = newBirthdate();
+
+  try {
+    User.create({
+      name: req.body.name,
+      username: req.body.username,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, Number.parseInt(authConfig.rounds)),
+      gender: req.body.username,
+      birthdate: req.body.username || birthdate,
+    })
+    .then(user => {
+      res.status(201).send(`New user created. ${user.name}, welcome.`);
+    });
+  } catch (error) {
+    res.status(400).send(`
+      Incorrect syntax. Please, check your request. ${error}
+    `);
+  }
 };
 
 UsersController.newUserAPI = async (req, res) => {
-    let userAPI = await axios.get(`https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}`);
+  let userAPI = await axios.get(`https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}`);
+  const array = [];
+  const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
 
-    const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
-    const randomInt = (min, max) => {
-        number = Math.floor(Math.random() * (max - min + 1) + min);
-        number < 10 ? number = `0${number}` : number;
-        return number;
-    }
-    let array = [];
-
-    for (let i=0;i<10;i++){
-        birthdate = `${randomInt(1930,2006)}`+'-'+
-                    `${randomInt(1,12)}`+'-'+
-                    `${randomInt(1,28)}`;
-        city_random = city[Math.floor(Math.random() * 9) + 0];
-        User.create({
-            birthdate: birthdate,
-            city: city_random,
-            name: userAPI.data.data[i].name.firstname.name,
-            lastname: userAPI.data.data[i].name.lastname.name,
-            gender: userAPI.data.data[i].name.firstname.gender,
-            email: userAPI.data.data[i].email.address,
-            password: bcrypt.hashSync(userAPI.data.data[i].password, Number.parseInt(authConfig.rounds)),
-            username: userAPI.data.data[i].email.username,
-        })
-        .then(user => {
-            array.push(user);
-        }).catch((error) => {
-            // res.send(error);
-            console.log(error);
-        });
-    }
-    res.send(`${PARSER_RESULTS} new users created.`);
+  for (let i=0;i<10;i++){
+      birthdate = `${randomInt(1930,2006)}`+'-'+
+                  `${randomInt(1,12)}`+'-'+
+                  `${randomInt(1,28)}`;
+      city_random = city[Math.floor(Math.random() * 9) + 0];
+      User.create({
+          birthdate: birthdate,
+          city: city_random,
+          name: userAPI.data.data[i].name.firstname.name,
+          lastname: userAPI.data.data[i].name.lastname.name,
+          gender: userAPI.data.data[i].name.firstname.gender,
+          email: userAPI.data.data[i].email.address,
+          password: bcrypt.hashSync(userAPI.data.data[i].password, Number.parseInt(authConfig.rounds)),
+          username: userAPI.data.data[i].email.username,
+      })
+      .then(user => {
+          array.push(user);
+      }).catch((error) => {
+          // res.send(error);
+          console.log(error);
+      });
+  }
+  res.send(`${PARSER_RESULTS} new users created.`);
 };
 
 UsersController.viewUser = (req, res) => {

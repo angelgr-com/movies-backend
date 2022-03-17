@@ -17,20 +17,38 @@ MoviesController.getAllMovies = (req, res) => {
     });
 }
 
-MoviesController.getActors = async (req, res) => {
-    let movie_id = req.params.movie_id;
+const getActors = async movie_id => {
+    console.log('movie_id', movie_id);
     // https://developers.themoviedb.org/3/movies/get-movie-credits
     let results = await axios.get(`
         https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${TMDB.api_key}&language=${TMDB.language}
     `);
     let actors = results.data.cast;   
     for (let i=actors.length-1; i>=0; i--) {
+        // Delete actors with popularity less than 10
         if (actors[i].popularity < 10.0) {
             actors.splice(i,1);
         }
     }
+    return actors;
+};
+MoviesController.getActors = async (req, res) => {
+    saveActors(req.params.movie_id);
+    res.send(await getActors(req.params.movie_id));
+}
 
-    res.send(actors);
+const saveActors = async (movie_id) => {
+    let actors = await getActors(movie_id);
+    console.log(actors);
+    for(const [property, value] of Object.entries(actors)) {
+        let actorDetails = await axios.get(` https://api.themoviedb.org/3/person/${actors.id}?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+        let name = actor.name;
+        let birthday = actorDetails.birthday;
+        let place_of_birth = actorDetails.place_of_birth;
+        let biography = actorDetails.biography;
+        let img = actor.profile_path;
+        console.log(actor);
+    }
 }
 
 MoviesController.search = async (req, res) => {
@@ -69,7 +87,7 @@ MoviesController.getGenres = async (req, res) => {
             if(genres != 0){
                 res.send(genres);
             }else {
-                // res.send(`There are no movies in the database.`);
+                res.send(`There are no movies in the database.`);
             }
         })
     })
