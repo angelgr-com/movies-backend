@@ -1,5 +1,9 @@
+require('dotenv').config();  // this line is important!
 module.exports = {
-    secret: "123456789",
-    expires: "24h",
-    rounds: 10
+  // secret = key used to encript
+  secret: process.env.AUTH_SECRET || '123456789',
+  // expires = token duration
+  expires: process.env.AUTH_EXPIRES || '4h',
+  // rounds = times the password is encrypted
+  rounds: process.env.AUTH_ROUNDS || 10
 }

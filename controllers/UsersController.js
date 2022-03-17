@@ -8,6 +8,27 @@ const parsername = require('../config/parsername');
 const PARSER_RESULTS = 10;
 import {ghUsers, randomInt, newBirthdate} from '../config/ghUsers';
 
+UsuarioController.viewAllUsers = (req, res) => {
+  Usuario.findAll()
+  .then(data => {
+    res.send(data)
+  });
+};
+
+UsersController.viewUser = (req, res) => {
+  try {      
+    User.findOne({
+      where : { username : req.params.username }
+    })
+    .then(data => {
+      res.send(data)
+    });
+  } 
+  catch (error) {
+    res.send(error);
+  }
+};
+
 // randomInt for newBirthdate function
 const randomInt = (min, max) => {
   number = Math.floor(Math.random() * (max - min + 1) + min);
@@ -48,6 +69,7 @@ const userExists = (email, username) => {
   });
 }
 
+// Array for randomCity
 const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
 
 UsersController.newUser = (req, res) => {
@@ -157,19 +179,6 @@ UsersController.newGhUsers = async (req, res) => {
     }
   }
   res.status(201).send(`${21} new GH users created.`);
-};
-
-UsersController.viewUser = (req, res) => {
-    try {      
-        User.findOne({
-            where : { username : req.params.username }
-        })
-        .then(data => {
-            res.send(data)
-        });
-    } catch (error) {
-        res.send(error);
-    }
 };
 
 UsersController.deleteUser = (req, res) => {
