@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const OrdersController = require('../controllers/OrdersController');
 
+// GET ENDPOINTS
+// http://localhost:5000/orders/
+router.get('/', OrdersController.getOrders);
+// http://localhost:5000/orders/id/
+router.get('/id/:id', OrdersController.getOrderByID);
+// http://localhost:5000/orders/user/
+router.get('/user/:id_user', OrdersController.getOrdersByUserID);
+
+// POST ENDPOINTS
 // {
 //   "id_user": "7c0e9806-aeab-4740-aece-90f9ac2271ee",
 //   "id_movie": "8ca6f9c2-c3ed-4000-b9ee-24028f67ba44"
@@ -10,13 +19,5 @@ const OrdersController = require('../controllers/OrdersController');
 // one movie per user with rent and return date
 router.post('/', OrdersController.newOrder);
 
-// http://localhost:5000/orders/
-router.get('/', OrdersController.getOrders);
-
-// http://localhost:5000/orders/id/
-router.get('/id/:id', OrdersController.getOrderByID);
-
-// http://localhost:5000/orders/user/
-router.get('/user/:id_user', OrdersController.getOrdersByUserID);
 
 module.exports = router;
