@@ -44,9 +44,17 @@ const newBirthdate = () => `
   ${randomInt(1,28)}
 `;
 
-// Arrow function to check if user exists
-const userExists = (email, username) => {
-  User.findAll({
+// Array for randomCity
+const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
+
+UsersController.newUser = (req, res) => {
+  let username = req.body.username;
+  let email = req.body.email;
+  const birthdate = newBirthdate();
+  randomCity = city[Math.floor(Math.random() * 9) + 0];
+
+  // Check if user exists to avoid duplicates
+  User.findOne({
     where : {
       [Op.or] : [
         {
@@ -61,48 +69,36 @@ const userExists = (email, username) => {
         }
       ]
     }
-  }).then(userExists => {
-    if(userExists) {
-      return true;
-    } else {
-      return false
+  }).
+  then(userExists => {
+    if (userExists != null) {
+      res.send("The username or email already exists in our database. Please, check your data.");
+    } 
+    else {
+      try {
+        User.create({
+          id: uuidv4(),
+          name: req.body.name,
+          username: req.body.username,
+          email: req.body.email,
+          password: bcrypt.hashSync(req.body.password, Number.parseInt(authConfig.rounds)),
+          gender: req.body.username,
+          birthdate: req.body.birthdate || birthdate,
+          city: req.body.city || randomCity,
+        })
+        .then(user => {
+          res.status(201).send(`New user created. ${user.name}, welcome.`);
+        });
+      } catch (error) {
+        res.status(400).send(`
+          Incorrect syntax. Please, check your request. ${error}
+        `);
+      }
     }
-  }).catch(error => {
-      res.send(error)
+  }).
+  catch(error => {
+    console.log(error)
   });
-}
-
-// Array for randomCity
-const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
-
-UsersController.newUser = (req, res) => {
-  const birthdate = newBirthdate();
-  randomCity = city[Math.floor(Math.random() * 9) + 0];
-
-  if (userExists(req.body.email, req.body.username)) {
-    res.send("The username or email already exists in our database. Please, check your data.");
-  } 
-  else {
-    try {
-      User.create({
-        id: uuidv4(),
-        name: req.body.name,
-        username: req.body.username,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, Number.parseInt(authConfig.rounds)),
-        gender: req.body.username,
-        birthdate: req.body.birthdate || birthdate,
-        city: req.body.city || randomCity,
-      })
-      .then(user => {
-        res.status(201).send(`New user created. ${user.name}, welcome.`);
-      });
-    } catch (error) {
-      res.status(400).send(`
-        Incorrect syntax. Please, check your request. ${error}
-      `);
-    }
-  }
 };
 
 UsersController.newUsersAPI = async (req, res) => {
@@ -110,39 +106,62 @@ UsersController.newUsersAPI = async (req, res) => {
     https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}
   `);
   const array = [];
-
-  for (let i=0;i<10;i++){
-    if (userExists(
-      userAPI.data.data[i].email.address,
-      userAPI.data.data[i].email.username
-    )) {
-      res.send("The username or email already exists in our database. Please, check your data.");
-    }
-    else {
-      birthdate = `${randomInt(1930,2006)}`+'-'+
-                  `${randomInt(1,12)}`+'-'+
-                  `${randomInt(1,28)}`;
-      randomCity = city[Math.floor(Math.random() * 9) + 0];
-
-      User.create({
-        id: uuidv4(),
-        name: userAPI.data.data[i].name.firstname.name,
-        username: userAPI.data.data[i].email.username,
-        email: userAPI.data.data[i].email.address,
-        password: bcrypt.hashSync(userAPI.data.data[i].password,
-                                  Number.parseInt(authConfig.rounds)),
-        gender: userAPI.data.data[i].name.firstname.gender,
-        birthdate: birthdate,
-        city: randomCity,
-      })
-      .then(user => {
-        array.push(user);
-      }).catch((error) => {
-        res.status(400).send(`
-          Incorrect syntax. Please, check your request. ${error}
-        `);
-      });
-    }
+  let email, username;
+  
+  for (let i=0;i<10;i++) {
+    email = userAPI.data.data[i].email.address;
+    username = userAPI.data.data[i].email.username;
+    
+    // Check if user exists to avoid duplicates
+    User.findOne({
+      where : {
+        [Op.or] : [
+          {
+            email : {
+              [Op.like] : email
+            }
+          },
+          {
+            username : {
+              [Op.like] : username
+            }
+          }
+        ]
+      }
+    }).
+    then(userExists => {
+      if (userExists != null) {
+        res.status(400).send("The username or email already exists in our database. Please, check your data.");
+      } 
+      else {
+        birthdate = `${randomInt(1930,2006)}`+'-'+
+                    `${randomInt(1,12)}`+'-'+
+                    `${randomInt(1,28)}`;
+        randomCity = city[Math.floor(Math.random() * 9) + 0];
+  
+        User.create({
+          id: uuidv4(),
+          name: userAPI.data.data[i].name.firstname.name,
+          username: userAPI.data.data[i].email.username,
+          email: userAPI.data.data[i].email.address,
+          password: bcrypt.hashSync(userAPI.data.data[i].password,
+                                    Number.parseInt(authConfig.rounds)),
+          gender: userAPI.data.data[i].name.firstname.gender,
+          birthdate: birthdate,
+          city: randomCity,
+        })
+        .then(user => {
+          array.push(user);
+        }).catch((error) => {
+          res.status(400).send(`
+            Incorrect syntax. Please, check your request. ${error}
+          `);
+        });
+      }
+    }).
+    catch(error => {
+      console.log(error)
+    });
     res.status(201).send(`${PARSER_RESULTS} new users created.`);
   }
 };

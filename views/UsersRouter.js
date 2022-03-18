@@ -23,7 +23,7 @@ router.get('/:username', auth, UsersController.viewUser);
 router.post('/', UsersController.newUser);
 
 // http://localhost:5000/users/API
-router.post('/', isAdmin, UsersController.newUsersAPI);
+router.post('/api', UsersController.newUsersAPI);
 
 // http://localhost:5000/users/GH/
 router.post('/', isAdmin, UsersController.newGhUsers);
