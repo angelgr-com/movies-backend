@@ -10,7 +10,6 @@ router.get('/', isAdmin, UsersController.viewAllUsers);
 // http://localhost:5000/users/:username
 router.get('/:username', auth, UsersController.viewUser);
 
-// http://localhost:5000/users/
 // {
 //   "name": "John",
 //   "username": "johndoe",
@@ -20,13 +19,14 @@ router.get('/:username', auth, UsersController.viewUser);
 //   "birthdate": "1950-01-01",
 //   "city": "Valencia"
 // }
+// http://localhost:5000/users/
 router.post('/', UsersController.newUser);
 
-// http://localhost:5000/users/API
+// http://localhost:5000/users/api
 router.post('/api', UsersController.newUsersAPI);
 
-// http://localhost:5000/users/GH/
-router.post('/', isAdmin, UsersController.newGhUsers);
+// http://localhost:5000/users/gh
+router.post('/gh', UsersController.newGhUsers);
 
 // http://localhost:5000/users/:user/delete
 router.delete('/:username', auth, UsersController.deleteUser);
