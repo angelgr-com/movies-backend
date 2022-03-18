@@ -1,55 +1,62 @@
 const OrdersController = {};
 const { Order } = require('../models/index');
+const { v4: uuidv4 } = require('uuid');
 
 OrdersController.newOrder = (req, res) => {
-    const RENTAL_PERIOD = 3;
-    let rent_date = new Date();
-    let return_date = new Date();
-    const jsDateToSQL = (date) => {
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        let day = date.getDate();
+  const RENTAL_PERIOD = 3;
+  let rent_date = new Date();
+  let return_date = new Date();
+  
+  const jsDateToSQL = (date) => {
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
 
-        // Add a zero if month or day are below 10
-        month < 10 ? (month = '0' + month) : month;
-        day < 10 ? (day = '0' + day) : day;
+    // Add a zero if month or day are below 10
+    month < 10 ? (month = '0' + month) : month;
+    day < 10 ? (day = '0' + day) : day;
 
-        return `${year}-${month}-${day}`;
-    };
-    // Calculate return date as rent date plus rental period
-    return_date.setDate(rent_date.getDate() + RENTAL_PERIOD);
-    jsDateToSQL(rent_date);
-    jsDateToSQL(return_date);
+    return `${year}-${month}-${day}`;
+  };
 
-    Order.create({
-        rent_date: rent_date,
-        return_date: return_date,
-        id_user: req.body.id_user,
-        is_paid: req.body.is_paid,
-    })
-        .then((movie) => {
-            res.send(`User '${req.body.id_user}' has placed a new order.`);
-        })
-        .catch((error) => {
-            res.send(error);
-        });
+  // Calculate return date as rent date plus rental period
+  return_date.setDate(rent_date.getDate() + RENTAL_PERIOD);
+  jsDateToSQL(rent_date);
+  jsDateToSQL(return_date);
+
+  // Save order in database
+  Order
+  .create({
+    id: uuidv4(),
+    rent_date: rent_date,
+    return_date: return_date,
+    id_user: req.body.id_user,
+    id_movie: req.body.id_movie,
+  })
+  .then(order => {
+      res.send(`User '${req.body.id_user}' has placed a new order.`);
+  })
+  .catch(error => {
+      res.send(error);
+  });
 };
 
-OrdersController.showOrders = (req, res) => {
-    Order.findAll()
-        .then((orders) => {
-            if (orders != 0) {
-                res.send(orders);
-            } else {
-                res.send(`There are no orders in the database.`);
-            }
-        })
-        .catch((error) => {
-            res.send(error);
-        });
+OrdersController.getOrders = (req, res) => {
+  Order.findAll()
+  .then((orders) => {
+    if (orders != 0) {
+      res.send(orders);
+    }
+    else {
+      res.send(`There are no orders in the database.`);
+    }
+  })
+  .catch((error) => {
+    res.send(error);
+  });
 };
 
-OrdersController.showOrderByID = (req, res) => {
+OrdersController.getOrderByID = (req, res) => {
     Order.findOne({
         where: { id: req.params.id },
     })
@@ -65,7 +72,7 @@ OrdersController.showOrderByID = (req, res) => {
         });
 };
 
-OrdersController.showOrdersByCity = async (req, res) => {
+OrdersController.getOrdersByCity = async (req, res) => {
     let query;
     if (req.params.city) {
         console.log('req.params.city = ', req.params.city);

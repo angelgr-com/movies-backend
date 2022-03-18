@@ -40,10 +40,10 @@ const getActors = async tmdb_id => {
   `);
   let actors = results.data.cast;   
   for (let i=actors.length-1; i>=0; i--) {
-      // Delete actors with popularity less than 10
-      if (actors[i].popularity < 10.0) {
-          actors.splice(i,1);
-      }
+    // Delete actors with popularity less than 10
+    if (actors[i].popularity < 10.0) {
+        actors.splice(i,1);
+    }
   }
   return actors;
 };
@@ -94,23 +94,24 @@ MoviesController.saveMovieByID = async (req, res) => {
       where : { tmdb_id: req.params.tmdb_id }
   })
   .then(movie => {
-      if(movie != null) {
-          res.send('The movie is already in the database');
-      } else {
-          Movie.create({
-              id: uuidv4(),
-              tmdb_id: req.params.tmdb_id,
-              title: results.data.title,
-              // price = random price bebtwwen 0.50 and 1
-              price: Math.floor(Math.random() * (100 - 50) + 50) / 100,
-          })
-          .then(movie => {
-              res.send(`"${results.data.title}" was added to the database.`);
-          })
-          .catch((error) => {
-              res.send(error);
-          });
-      }
+    if(movie != null) {
+      res.send('The movie is already in the database');
+    } 
+    else {
+      Movie.create({
+        id: uuidv4(),
+        tmdb_id: req.params.tmdb_id,
+        title: results.data.title,
+        // price = random price bebtwwen 0.50 and 1
+        price: Math.floor(Math.random() * (100 - 50) + 50) / 100,
+      })
+      .then(movie => {
+          res.send(`"${results.data.title}" was added to the database.`);
+      })
+      .catch((error) => {
+          res.send(error);
+      });
+    }
   }).catch(error => {
       res.send(error);
   });
