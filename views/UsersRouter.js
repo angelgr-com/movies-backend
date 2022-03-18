@@ -4,11 +4,8 @@ const auth = require('../middlewares/auth');
 const isAdmin = require('../middlewares/isAdmin');
 const UsersController = require('../controllers/UsersController');
 
-// http://localhost:5000/users/
-router.get('/', isAdmin, UsersController.viewAllUsers);
-
 // http://localhost:5000/users/:username
-router.get('/:username', auth, UsersController.viewUser);
+router.get('/:username', auth, UsersController.getUser);
 
 // {
 //   "name": "John",
@@ -22,16 +19,25 @@ router.get('/:username', auth, UsersController.viewUser);
 // http://localhost:5000/users/
 router.post('/', UsersController.newUser);
 
-// http://localhost:5000/users/api
-router.post('/api', UsersController.newUsersAPI);
-
-// http://localhost:5000/users/gh
-router.post('/gh', UsersController.newGhUsers);
-
-// http://localhost:5000/users/:user/delete
-router.delete('/:username', auth, UsersController.deleteUser);
-
 // http://localhost:5000/users/login
 router.post('/login', UsersController.login);
+
+// http://localhost:5000/users/password
+router.put('/password', auth, UsersController.updatePassword);
+
+// http://localhost:5000/users/:username
+router.put('/:username', auth, UsersController.updateProfile);
+
+// http://localhost:5000/users/:username
+router.delete('/:username', UsersController.deleteUser);
+
+// http://localhost:5000/users/list
+router.post('/list', isAdmin, UsersController.getAllUsers);
+
+// http://localhost:5000/users/api
+router.post('/api', isAdmin, UsersController.newUsersAPI);
+
+// http://localhost:5000/users/gh
+router.post('/gh', isAdmin, UsersController.newGhUsers);
 
 module.exports = router;

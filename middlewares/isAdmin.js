@@ -5,13 +5,13 @@ module.exports = (req, res, next) => {
 
   Admin
   .findOne({
-    where : { id : id }
+    where : { id_user : id }
   })
   .then(isAdmin => {
     if(isAdmin){
       next();
     }else {
-        res.send(`The user has no admin privileges.`)
+      res.send(`The user has no admin privileges.`)
     }
   })
   .catch(error => {

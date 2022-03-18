@@ -11,42 +11,6 @@ const PARSER_RESULTS = 10;
 const data = require('../config/ghUsers');
 let ghUsers = data.ghUsers;
 
-UsersController.viewAllUsers = (req, res) => {
-  User.findAll()
-  .then(data => {
-    res.send(data)
-  });
-};
-
-UsersController.viewUser = (req, res) => {
-  try {      
-    User.findOne({
-      where : { username : req.params.username }
-    })
-    .then(data => {
-      res.send(data)
-    });
-  } 
-  catch (error) {
-    res.send(error);
-  }
-};
-
-// randomInt for newBirthdate function
-const randomInt = (min, max) => {
-  number = Math.floor(Math.random() * (max - min + 1) + min);
-  number < 10 ? number = `0${number}` : number;
-  return number;
-}
-const newBirthdate = () => `
-  ${randomInt(1930,2006)}-
-  ${randomInt(1,12)}-
-  ${randomInt(1,28)}
-`;
-
-// Array for randomCity
-const city = ['Valencia', 'Torrent', 'Gandia', 'Paterna', 'Sagunt', 'Mislata', 'Burjassot', 'Ontinyent', 'Aldaia', 'Manises'];
-
 UsersController.newUser = (req, res) => {
   let username = req.body.username;
   let email = req.body.email;
@@ -101,6 +65,159 @@ UsersController.newUser = (req, res) => {
   });
 };
 
+UsersController.login = (req, res) => {
+  User.findOne({
+      where : {email : req.body.email}
+  })
+  .then(User =>{
+      if (!User) {
+          res.send("Incorrect user or password");
+      } else {
+          if (bcrypt.compareSync(req.body.password, User.password)) {
+              let token = jwt.sign({ user: User }, authConfig.secret, {
+                  expiresIn: authConfig.expires
+              });
+              res.status(200).json({
+                  user: User.username,
+                  token: token
+              })
+          } else {
+              res.status(401).json({ msg: "Incorrect user or password." });
+          }
+      }
+  })
+  .catch(error => {
+      res.send(error);
+  })
+};
+
+UsersController.getUser = (req, res) => {
+  try {      
+    User.findOne({
+      where : { username : req.params.username }
+    })
+    .then(user => {
+      const object = {};
+      object.name = user.name;
+      object.username = user.username;
+      object.email = user.email;
+      object.gender = user.gender;
+      object.birthdate = user.birthdate;
+      object.city = user.city;
+      res.send(object);
+    });
+  } 
+  catch (error) {
+    res.send(error);
+  }
+};
+
+UsersController.updatePassword = (req,res) => {
+  let username = req.body.username;
+  let oldPassword = req.body.oldPassword;
+  let newPassword = req.body.newPassword;
+
+  User
+  .findOne({
+      where : { username : username}
+  })
+  .then(userFound => {
+    console.log(userFound);
+    if(userFound){
+      // if passwords match
+      if (bcrypt.compareSync(oldPassword, userFound.password)) {
+        // encrypt new password
+        newPassword = bcrypt.hashSync(newPassword, Number.parseInt(authConfig.rounds)); 
+
+        //save new password
+        let data = {
+            password: newPassword
+        }
+        User.update(data, {
+            where: {username : username}
+        })
+        .then(userUpdated => {
+            console.log(`User updated: ${userUpdated}`);
+            res.status(201).send(`The password have been updated`);
+        })
+        .catch((error) => {
+            res.status(401).json({ msg: `An error occurred while updating the password: ${error}`});
+        });
+      // if provided and stored passwords don't match
+      } else {
+          res.status(401).json({ msg: "Invalid user or password" });
+      }
+    }
+  })
+  .catch((error => {
+      res.send(error);
+  }));
+
+};
+
+UsersController.updateProfile = async (req, res) => {
+  let data = req.body;
+  let username = req.params.username;
+  console.log('data', data);
+  
+  try {
+    User
+    .update(data, {
+      where: {username : username}
+    })
+    .then(userUpdated => {
+      console.log('userUpdated: ', userUpdated);
+      res.send(userUpdated);
+    });
+  } catch (error) {
+      res.send(error);
+  }
+};
+
+UsersController.deleteUser = (req, res) => {
+  try {
+      User.destroy({
+          where : { username : req.params.username }
+      })
+      .then(removedUser => {
+          res.send(`User ${req.params.username} has been removed.`);
+      });
+  } catch (error) {
+      res.send(error);
+  }
+};
+
+UsersController.getAllUsers = (req, res) => {
+  User.findAll()
+  .then(data => {
+    res.send(
+      data.map(user => {
+        const object = {};
+        object.name = user.name;
+        object.username = user.username;
+        return object;
+      })
+    )
+  });
+};
+
+// randomInt for newBirthdate function
+const randomInt = (min, max) => {
+  number = Math.floor(Math.random() * (max - min + 1) + min);
+  number < 10 ? number = `0${number}` : number;
+  return number;
+}
+const newBirthdate = () => `
+  ${randomInt(1930,2006)}-
+  ${randomInt(1,12)}-
+  ${randomInt(1,28)}
+`;
+
+// Array for randomCity function
+const city = ['Valencia', 'Torrent', 'Gandia', 
+              'Paterna', 'Sagunt', 'Mislata', 
+              'Burjassot', 'Ontinyent', 'Aldaia', 
+              'Manises'];
 UsersController.newUsersAPI = async (req, res) => {
   const userAPI = await axios.get(`
     https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}
@@ -236,45 +353,6 @@ UsersController.newGhUsers = async (req, res) => {
       console.log(error)
     });
   }
-};
-
-UsersController.deleteUser = (req, res) => {
-    try {
-        User.destroy({
-            where : { username : req.params.username }
-        })
-        .then(removedUser => {
-            res.send(`User ${req.params.username} has been removed.`);
-        });
-    } catch (error) {
-        res.send(error);
-    }
-};
-
-UsersController.login = (req, res) => {
-    User.findOne({
-        where : {email : req.body.email}
-    })
-    .then(User =>{
-        if (!User) {
-            res.send("Incorrect user or password");
-        } else {
-            if (bcrypt.compareSync(req.body.password, User.password)) {
-                let token = jwt.sign({ user: User }, authConfig.secret, {
-                    expiresIn: authConfig.expires
-                });
-                res.json({
-                    user: User,
-                    token: token
-                })
-            } else {
-                res.status(401).json({ msg: "Incorrect user or password." });
-            }
-        }
-    })
-    .catch(error => {
-        res.send(error);
-    })
 };
 
 module.exports = UsersController;
