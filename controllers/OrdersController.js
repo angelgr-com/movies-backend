@@ -57,56 +57,74 @@ OrdersController.getOrders = (req, res) => {
 };
 
 OrdersController.getOrderByID = (req, res) => {
-    Order.findOne({
-        where: { id: req.params.id },
-    })
-        .then((order) => {
-            if (order != 0) {
-                res.send(order);
-            } else {
-                res.send(`There are no orders with id ${req.params.id}.`);
-            }
-        })
-        .catch((error) => {
-            res.send(error);
-        });
-};
-
-OrdersController.getOrdersByCity = async (req, res) => {
-    let query;
-    if (req.params.city) {
-        console.log('req.params.city = ', req.params.city);
-        query = `
-    SELECT 
-      users.city AS City, 
-      users.name AS Name, 
-      users.lastname AS Lastname, 
-      orders.rent_date AS 'Rent date' 
-    FROM users 
-    INNER JOIN orders ON users.id = orders.id_user 
-    WHERE city = '${req.params.city}' 
-    ORDER BY City ASC
-    `;
+  Order
+  .findOne({
+    where: { id: req.params.id },
+  })
+  .then((order) => {
+    if (order != 0) {
+      res.send(order);
     } else {
-        query = `
-    SELECT 
-      users.city AS City, 
-      users.name AS Name, 
-      users.lastname AS Lastname, 
-      orders.rent_date AS 'Rent date' 
-    FROM users 
-    INNER JOIN orders ON users.id = orders.id_user 
-    ORDER BY City ASC
-    `;
+      res.send(`There are no orders with id ${req.params.id}.`);
     }
-
-    let result = await Order.sequelize.query(query, {
-        type: Order.sequelize.QueryTypes.SELECT,
-    });
-
-    if (result) {
-        res.send(result);
-    }
+  })
+  .catch((error) => {
+    res.send(error);
+  });
 };
+
+OrdersController.getOrdersByUserID = (req, res) => {
+  Order
+  .findOne({
+    where: { id_user: req.params.id_user },
+  })
+  .then((order) => {
+    if (order != 0) {
+      res.send(order);
+    } else {
+      res.send(`There are no orders.`);
+    }
+  })
+  .catch((error) => {
+    res.send(error);
+  });
+};
+
+// OrdersController.getOrdersByCity = async (req, res) => {
+//     let query;
+//     if (req.params.city) {
+//         console.log('req.params.city = ', req.params.city);
+//         query = `
+//     SELECT 
+//       users.city AS City, 
+//       users.name AS Name, 
+//       users.lastname AS Lastname, 
+//       orders.rent_date AS 'Rent date' 
+//     FROM users 
+//     INNER JOIN orders ON users.id = orders.id_user 
+//     WHERE city = '${req.params.city}' 
+//     ORDER BY City ASC
+//     `;
+//     } else {
+//         query = `
+//     SELECT 
+//       users.city AS City, 
+//       users.name AS Name, 
+//       users.lastname AS Lastname, 
+//       orders.rent_date AS 'Rent date' 
+//     FROM users 
+//     INNER JOIN orders ON users.id = orders.id_user 
+//     ORDER BY City ASC
+//     `;
+//     }
+
+//     let result = await Order.sequelize.query(query, {
+//         type: Order.sequelize.QueryTypes.SELECT,
+//     });
+
+//     if (result) {
+//         res.send(result);
+//     }
+// };
 
 module.exports = OrdersController;

@@ -16,4 +16,7 @@ router.get('/', OrdersController.getOrders);
 // http://localhost:5000/orders/id/
 router.get('/id/:id', OrdersController.getOrderByID);
 
+// http://localhost:5000/orders/user/
+router.get('/user/:id_user', OrdersController.getOrdersByUserID);
+
 module.exports = router;
