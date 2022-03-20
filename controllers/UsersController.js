@@ -71,7 +71,7 @@ UsersController.login = (req, res) => {
   })
   .then(User =>{
       if (!User) {
-          res.send("Incorrect user or password");
+          res.status(401).send("Invalid user or password");
       } else {
           if (bcrypt.compareSync(req.body.password, User.password)) {
               let token = jwt.sign({ user: User }, authConfig.secret, {
@@ -82,7 +82,7 @@ UsersController.login = (req, res) => {
                   token: token
               })
           } else {
-              res.status(401).json({ msg: "Incorrect user or password." });
+              res.status(401).json({ msg: "Invalid user or password" });
           }
       }
   })
