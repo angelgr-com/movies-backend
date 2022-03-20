@@ -1,6 +1,3 @@
 /node_modules
-/config/config.json
 /config/auth_copy.js
-/config/TMDB.js
-/config/parsername.js
 .env
