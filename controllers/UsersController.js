@@ -1,8 +1,9 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const UsersController = {};
 const { User } = require('../models/index');
 const { Op } = require("sequelize");
 const { v4: uuidv4 } = require('uuid');
-const authConfig = require('../config/auth');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
@@ -45,7 +46,7 @@ UsersController.newUser = (req, res) => {
           name: req.body.name,
           username: req.body.username,
           email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, Number.parseInt(authConfig.rounds)),
+          password: bcrypt.hashSync(req.body.password, Number.parseInt(process.env.rounds)),
           gender: req.body.username,
           birthdate: req.body.birthdate || birthdate,
           city: req.body.city || randomCity,
@@ -74,8 +75,8 @@ UsersController.login = (req, res) => {
           res.status(401).send("Invalid user or password");
       } else {
           if (bcrypt.compareSync(req.body.password, User.password)) {
-              let token = jwt.sign({ user: User }, authConfig.secret, {
-                  expiresIn: authConfig.expires
+              let token = jwt.sign({ user: User }, process.env.secret, {
+                  expiresIn: process.env.expires
               });
               res.status(200).json({
                   user: User.username,
@@ -127,7 +128,7 @@ UsersController.updatePassword = (req,res) => {
       // if passwords match
       if (bcrypt.compareSync(oldPassword, userFound.password)) {
         // encrypt new password
-        newPassword = bcrypt.hashSync(newPassword, Number.parseInt(authConfig.rounds)); 
+        newPassword = bcrypt.hashSync(newPassword, Number.parseInt(process.env.rounds)); 
 
         //save new password
         let data = {
@@ -260,7 +261,7 @@ UsersController.newUsersAPI = async (req, res) => {
           username: userAPI.data.data[i].email.username,
           email: userAPI.data.data[i].email.address,
           password: bcrypt.hashSync(userAPI.data.data[i].password,
-                                    Number.parseInt(authConfig.rounds)),
+                                    Number.parseInt(process.env.rounds)),
           gender: userAPI.data.data[i].name.firstname.gender,
           birthdate: birthdate,
           city: randomCity,
@@ -329,7 +330,7 @@ UsersController.newGhUsers = async (req, res) => {
           email: ghUsers[i].email,
           password: bcrypt.hashSync(
             '1234',
-            Number.parseInt(authConfig.rounds)
+            Number.parseInt(process.env.rounds)
           ),
           gender: ghUsers[i].gender,
           birthdate: birthdate,
