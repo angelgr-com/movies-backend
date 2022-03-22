@@ -12,6 +12,7 @@ const PARSERNAME_COUNTRY = 'ES';
 UsersController.newUser = (req, res) => {
   let username = req.body.username;
   let email = req.body.email;
+
   const birthdate = newBirthdate();
   randomCity = city[Math.floor(Math.random() * 9) + 0];
 
@@ -34,7 +35,7 @@ UsersController.newUser = (req, res) => {
   }).
   then(userExists => {
     if (userExists != null) {
-      res.send("The username or email already exists in our database. Please, check your data.");
+      res.status(400).send('Username or email already exists. They must be unique.');
     } 
     else {
       try {
@@ -96,14 +97,20 @@ UsersController.getUser = (req, res) => {
       where : { username : req.params.username }
     })
     .then(user => {
-      const object = {};
-      object.name = user.name;
-      object.username = user.username;
-      object.email = user.email;
-      object.gender = user.gender;
-      object.birthdate = user.birthdate;
-      object.city = user.city;
-      res.send(object);
+      if (!User) {
+        res.status(400).send("Invalid user");
+      }
+      else {
+        const object = {
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          gender: user.gender,
+          birthdate: user.birthdate,
+          city: user.city,
+        };
+        res.status(200).send(object);
+      }
     });
   } 
   catch (error) {
@@ -138,11 +145,11 @@ UsersController.updatePassword = (req,res) => {
             res.status(201).send(`The password have been updated`);
         })
         .catch((error) => {
-            res.status(401).json({ msg: `An error occurred while updating the password: ${error}`});
+            res.status(400).json({ msg: `An error occurred while updating the password: ${error}`});
         });
       // if provided and stored passwords don't match
       } else {
-          res.status(401).json({ msg: "Invalid user or password" });
+          res.status(400).json({ msg: "Invalid user or password" });
       }
     }
   })
@@ -162,37 +169,43 @@ UsersController.updateProfile = async (req, res) => {
       where: {username : username}
     })
     .then(userUpdated => {
-      res.send(userUpdated);
+      res.status(201).send(`The profile have been updated`);
     });
   } catch (error) {
-      res.send(error);
+      res.status(400).send(error);
   }
 };
 
 UsersController.deleteUser = (req, res) => {
   try {
       User.destroy({
-          where : { username : req.params.username }
+        where : { username : req.params.username }
       })
       .then(removedUser => {
-          res.send(`User ${req.params.username} has been removed.`);
+        if (!removedUser) {
+          res.status(400).send('Invalid user.');
+        } else {
+          res.status(201).send(`User ${req.params.username} has been removed.`);
+        }
       });
   } catch (error) {
-      res.send(error);
+      res.status(400).send(error);
   }
 };
 
 UsersController.getAllUsers = (req, res) => {
   User.findAll()
   .then(data => {
-    res.send(
-      data.map(user => {
-        const object = {};
-        object.name = user.name;
-        object.username = user.username;
-        return object;
-      })
-    )
+    if(data){
+      res.status(200).send(
+        data.map(user => {
+          const object = {};
+          object.name = user.name;
+          object.username = user.username;
+          return object;
+        })
+      )
+      }
   });
 };
 

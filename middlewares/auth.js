@@ -10,12 +10,12 @@ module.exports = (req, res, next) => {
     let token = req.headers.authorization.split(" ")[1];
 
     // Check the validity of this token
-    jwt.verify(token, process.env.AUTH_EXPIRES, (err, decoded) => {
+    jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
       if(err) {
-          res.status(500).json({ msg: "A problem occurred while decoding the token: ", err });
+        res.status(500).json({ msg: "A problem occurred while decoding the token: ", err });
       } else {
-          req.user = decoded;
-          next();
+        req.user = decoded;
+        next();
       }
     });
   }

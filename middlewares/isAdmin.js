@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     if(isAdmin){
       next();
     }else {
-      res.send(`The user has no admin privileges.`)
+      res.status(401).send(`The user has no admin privileges.`)
     }
   })
   .catch(error => {

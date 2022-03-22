@@ -37,6 +37,6 @@ router.put('/:username', auth, UsersController.updateProfile);
 
 // DELETE ENDPOINTS
 // http://localhost:5000/users/:username
-router.delete('/:username', UsersController.deleteUser);
+router.delete('/:username', auth, UsersController.deleteUser);
 
 module.exports = router;
