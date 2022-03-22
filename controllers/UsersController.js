@@ -7,10 +7,9 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
-const parsername = require('../config/parsername');
-const PARSER_RESULTS = 10;
-const data = require('../config/ghUsers');
-let ghUsers = data.ghUsers;
+const PARSERNAME_API_KEY = process.env.PARSERNAME_API_KEY;
+const PARSERNAME_RESULTS = 10;
+const PARSERNAME_COUNTRY = 'ES';
 
 UsersController.newUser = (req, res) => {
   let username = req.body.username;
@@ -221,11 +220,11 @@ const city = ['Valencia', 'Torrent', 'Gandia',
               'Manises'];
 UsersController.newUsersAPI = async (req, res) => {
   const userAPI = await axios.get(`
-    https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${PARSER_RESULTS}
+    https://api.parser.name/?api_key=${PARSERNAME_API_KEY}&endpoint=generate&country_code=${PARSERNAME_COUNTRY}&results=${PARSERNAME_RESULTS}
   `);
   const array = [];
   
-  for (let i=0;i<PARSER_RESULTS;i++) {
+  for (let i=0;i<PARSERNAME_RESULTS;i++) {
     let email = userAPI.data.data[i].email.address; 
     let username = userAPI.data.data[i].email.username;
     // Check if user exists to avoid duplicates
@@ -269,76 +268,6 @@ UsersController.newUsersAPI = async (req, res) => {
         .then(user => {
           array.push(user);
           if (i === 9) {
-            res.status(201).send(`
-              ${array.length} new users have been added.
-            `);
-          }
-        }).catch((error) => {
-          res.status(400).send(`
-            Incorrect syntax. Please, check your request. ${error}
-          `);
-        });
-      }
-    }).
-    catch(error => {
-      console.log(error)
-    });
-  }
-};
-
-UsersController.newGhUsers = async (req, res) => {
-  const userAPI = await axios.get(`
-    https://api.parser.name/?api_key=${parsername.api_key}&endpoint=generate&country_code=${parsername.country_code}&results=${21}
-  `);
-  const array = [];
-
-  for (let i=0;i<21;i++) {
-    let email = ghUsers[i].email;
-    let username = ghUsers[i].username;
-    // Check if user exists to avoid duplicates
-    User.findOne({
-      where : {
-        [Op.or] : [
-          {
-            email : {
-              [Op.like] : email
-            }
-          },
-          {
-            username : {
-              [Op.like] : username
-            }
-          }
-        ]
-      }
-    }).
-    then(userExists => {
-      if (userExists != null) {
-        console.log(`The user ${ghUsers[i].username} was already registered.`)
-        // res.status(400).send("The username or email already exists in our database. Please, check your data.");
-      } 
-      else {
-        birthdate = `${randomInt(1930,2006)}`+'-'+
-                    `${randomInt(1,12)}`+'-'+
-                    `${randomInt(1,28)}`;
-        randomCity = city[Math.floor(Math.random() * 9) + 0];
-        
-        User.create({
-          id: uuidv4(),
-          name: ghUsers[i].name,
-          username: ghUsers[i].username,
-          email: ghUsers[i].email,
-          password: bcrypt.hashSync(
-            '1234',
-            Number.parseInt(process.env.rounds)
-          ),
-          gender: ghUsers[i].gender,
-          birthdate: birthdate,
-          city: randomCity,
-        })
-        .then(user => {
-          array.push(user);
-          if (i === 20) {
             res.status(201).send(`
               ${array.length} new users have been added.
             `);

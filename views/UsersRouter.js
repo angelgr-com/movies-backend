@@ -28,8 +28,6 @@ router.post('/login', UsersController.login);
 router.post('/list', isAdmin, UsersController.getAllUsers);
 // http://localhost:5000/users/api
 router.post('/api', isAdmin, UsersController.newUsersAPI);
-// http://localhost:5000/users/gh
-router.post('/gh', isAdmin, UsersController.newGhUsers);
 
 // PUT ENDPOINTS
 // http://localhost:5000/users/password

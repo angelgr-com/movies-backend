@@ -1,9 +1,12 @@
+const dotenv = require("dotenv");
+dotenv.config();
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const MoviesController = {};
-const TMDB = require('../config/TMDB');
 const { default: axios } = require('axios');
 const { Movie } = require('../models/index');
 const { Genre } = require('../models/index');
 const { v4: uuidv4 } = require('uuid');
+let language = 'en-us';
 
 MoviesController.search = async (req, res) => {
   let id = req.query.id;
@@ -15,14 +18,14 @@ MoviesController.search = async (req, res) => {
           } else {
               // https://developers.themoviedb.org/3/movies/get-movie-details
               let results = await axios.get(`
-              https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB.api_key}&language=${TMDB.language}
+              https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}&language=${language}
               `);
               res.send(results.data);
           }
       } else if (req.query.title) {
           // https://developers.themoviedb.org/3/search/search-movies
           let results = await axios.get(`
-          https://api.themoviedb.org/3/search/movie?api_key=${TMDB.api_key}&query=${title}&language=${TMDB.language}&page=1&include_adult=false
+          https://api.themoviedb.org/3/search/movie?TMDB_API_KEY=${TMDB_API_KEY}&query=${title}&language=${language}&page=1&include_adult=false
           `);
           res.send(results.data);
       } else {
@@ -36,7 +39,7 @@ MoviesController.search = async (req, res) => {
 const getActors = async tmdb_id => {
   // https://developers.themoviedb.org/3/movies/get-movie-credits
   let results = await axios.get(`
-      https://api.themoviedb.org/3/movie/${tmdb_id}/credits?api_key=${TMDB.api_key}&language=${TMDB.language}
+      https://api.themoviedb.org/3/movie/${tmdb_id}/credits?api_key=${TMDB_API_KEY}&language=${language}
   `);
   let actors = results.data.cast;   
   for (let i=actors.length-1; i>=0; i--) {
@@ -52,7 +55,7 @@ MoviesController.getActors = async (req, res) => {
 }
 
 MoviesController.getGenres = async (req, res) => {
-  let results = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+  let results = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=${language}`);
   let genres = [];
   let genre = {};
 
@@ -83,11 +86,11 @@ MoviesController.getAllMovies = (req, res) => {
 MoviesController.saveMovieByID = async (req, res) => {
   // https://developers.themoviedb.org/3/movies/get-movie-details
   let results = await axios.get(`
-  https://api.themoviedb.org/3/movie/${req.params.tmdb_id}?api_key=${TMDB.api_key}&language=${TMDB.language}`);
+  https://api.themoviedb.org/3/movie/${req.params.tmdb_id}?api_key=${TMDB_API_KEY}&language=${language}`);
   
   // https://developers.themoviedb.org/3/movies/get-movie-external-ids
   let externalIDs = await axios.get(`
-  https://api.themoviedb.org/3/movie/${req.params.tmdb_id}/external_ids?api_key=${TMDB.api_key}&`);
+  https://api.themoviedb.org/3/movie/${req.params.tmdb_id}/external_ids?api_key=${TMDB_API_KEY}&`);
 
 
   Movie.findOne({
@@ -122,12 +125,12 @@ MoviesController.saveTopRatedMovies = async (req, res) => {
   let page = Math.floor(Math.random() * (10 - 1 + 1) + 1);
   // https://developers.themoviedb.org/3/movies/get-top-rated-movies
   let results = await axios.get(`
-  https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB.api_key}&language=${TMDB.language}&page=${page}`);
+  https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB_API_KEY}&language=${language}&page=${page}`);
   let movies = 0;
   for (let i=0;i<20;i++) {
       let tmdbID = results.data.results[i].id;
       // https://developers.themoviedb.org/3/movies/get-movie-external-ids
-      let externalIDs = await axios.get(`https://api.themoviedb.org/3/movie/${tmdbID}/external_ids?api_key=${TMDB.api_key}&`);
+      let externalIDs = await axios.get(`https://api.themoviedb.org/3/movie/${tmdbID}/external_ids?api_key=${TMDB_API_KEY}&`);
 
       // Only saves to the database if movie is not added
       Movie.findOne({
