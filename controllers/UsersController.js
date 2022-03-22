@@ -1,5 +1,3 @@
-const dotenv = require("dotenv");
-dotenv.config();
 const UsersController = {};
 const { User } = require('../models/index');
 const { Op } = require("sequelize");
@@ -45,7 +43,7 @@ UsersController.newUser = (req, res) => {
           name: req.body.name,
           username: req.body.username,
           email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, Number.parseInt(process.env.rounds)),
+          password: bcrypt.hashSync(req.body.password, Number.parseInt(process.env.AUTH_ROUNDS)),
           gender: req.body.username,
           birthdate: req.body.birthdate || birthdate,
           city: req.body.city || randomCity,
@@ -72,18 +70,19 @@ UsersController.login = (req, res) => {
   .then(User =>{
       if (!User) {
           res.status(401).send("Invalid user or password");
-      } else {
-          if (bcrypt.compareSync(req.body.password, User.password)) {
-              let token = jwt.sign({ user: User }, process.env.secret, {
-                  expiresIn: process.env.expires
-              });
-              res.status(200).json({
-                  user: User.username,
-                  token: token
-              })
-          } else {
-              res.status(401).json({ msg: "Invalid user or password" });
-          }
+      }
+      else {
+        if (bcrypt.compareSync(req.body.password, User.password)) {
+          let token = jwt.sign({ user: User }, process.env.AUTH_SECRET, {
+            expiresIn: process.env.AUTH_EXPIRES
+          });
+          res.status(200).json({
+              user: User.username,
+              token: token
+          });
+        } else {
+          res.status(401).json({ msg: "Invalid user or password" });
+        }
       }
   })
   .catch(error => {
@@ -122,12 +121,11 @@ UsersController.updatePassword = (req,res) => {
       where : { username : username}
   })
   .then(userFound => {
-    console.log(userFound);
     if(userFound){
       // if passwords match
       if (bcrypt.compareSync(oldPassword, userFound.password)) {
         // encrypt new password
-        newPassword = bcrypt.hashSync(newPassword, Number.parseInt(process.env.rounds)); 
+        newPassword = bcrypt.hashSync(newPassword, Number.parseInt(process.env.AUTH_ROUNDS)); 
 
         //save new password
         let data = {
@@ -137,7 +135,6 @@ UsersController.updatePassword = (req,res) => {
             where: {username : username}
         })
         .then(userUpdated => {
-            console.log(`User updated: ${userUpdated}`);
             res.status(201).send(`The password have been updated`);
         })
         .catch((error) => {
@@ -158,7 +155,6 @@ UsersController.updatePassword = (req,res) => {
 UsersController.updateProfile = async (req, res) => {
   let data = req.body;
   let username = req.params.username;
-  console.log('data', data);
   
   try {
     User
@@ -166,7 +162,6 @@ UsersController.updateProfile = async (req, res) => {
       where: {username : username}
     })
     .then(userUpdated => {
-      console.log('userUpdated: ', userUpdated);
       res.send(userUpdated);
     });
   } catch (error) {
@@ -260,7 +255,7 @@ UsersController.newUsersAPI = async (req, res) => {
           username: userAPI.data.data[i].email.username,
           email: userAPI.data.data[i].email.address,
           password: bcrypt.hashSync(userAPI.data.data[i].password,
-                                    Number.parseInt(process.env.rounds)),
+                                    Number.parseInt(process.env.AUTH_ROUNDS)),
           gender: userAPI.data.data[i].name.firstname.gender,
           birthdate: birthdate,
           city: randomCity,
