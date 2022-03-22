@@ -269,7 +269,7 @@ UsersController.newUsersAPI = async (req, res) => {
           array.push(user);
           if (i === 9) {
             res.status(201).send(`
-              ${array.length} new users have been added.
+              ${PARSERNAME_RESULTS} new users have been added.
             `);
           }
         }).catch((error) => {
