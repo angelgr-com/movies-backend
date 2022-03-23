@@ -27,7 +27,7 @@ Remove caret symbol (^) in package.json dependencies:
    }
 ```
 
-Add in package.json (we will start server with 'npm run dev')
+Add script in package.json (we will start server with 'npm run dev')
 
 ```
 "dev": "nodemon index.js",
@@ -44,7 +44,7 @@ const cors = require('cors');
 const router = require('./router');
 ```
 
-Use middlewares ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) and express) and router:
+Use middlewares ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS), express and router:
 
 ```js
 let corsOptions = {
@@ -753,7 +753,22 @@ Add it to .gitignore as contains db password an make a copy as an example:
 ## User
 
 ```
-sequelize model:generate --name User --attributes username:string,name:string,lastname:string,gender:string,birthdate:dateonly,city:string,email:string,password:string
+sequelize model:generate --name User --attributes name:string,username:string,email:string,password:string,gender:string,birthdate:dateonly,city:string
+```
+
+Sequelize - using UUID for primary key column in your table models
+https://sebhastian.com/sequelize-uuid/
+
+In migration user:
+
+```
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+      },
 ```
 
 ## Admin
@@ -772,16 +787,24 @@ Define associations:
       static associate(models) {
         // define association here
         this.belongsTo(models.User, {
-            foreignKey: 'id_user'
+          foreignKey: 'id_user'
         });
       }
+    }
+    Admin.init({
+      id_user: DataTypes.UUID
+    }, {
+      sequelize,
+      modelName: 'Admin',
+    });
   ```
 
 - In migration admin:
 
   ```js
         id_user: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
           allowNull: false,
           references: {
               model: 'Users',
@@ -795,15 +818,29 @@ Define associations:
 Generate Movie model.
 
 ```js
-sequelize model:generate --name Movie --attributes title:string,tmdb_id:string,imdb_id:string,facebook_id:string,instagram_id:string,twitter_id:string,popularity:decimal,poster_path:string,release_date:dateonly,video:string,vote_average:decimal,vote_count:decimal
+sequelize model:generate --name Movie --attributes tmdb_id:string,title:string,price:decimal
 ```
+
+- In migration movie:
+
+  ```
+        id: {
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4
+        },
+  ```
+
+  
 
 ## Order
 
 Generate Order model.
 
 ```js
-sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,is_paid:boolean,id_user:integer,id_movie:integer
+sequelize model:generate --name Order --attributes rent_date:dateonly,return_date:dateonly,id_user:integer,id_movie:integer
 ```
 
 Define associations:
@@ -814,19 +851,43 @@ Define associations:
       static associate(models) {
         // define association here
         this.belongsTo(models.User, {
-            foreignKey: 'id_user'
+          foreignKey: 'id_user'
         });
         this.belongsTo(models.Movie, {
             foreignKey: 'id_movie'
         });
       }
+    }
+    Order.init({
+      rent_date: DataTypes.DATEONLY,
+      return_date: DataTypes.DATEONLY,
+      id_user: DataTypes.UUID,
+      id_movie: DataTypes.UUID
+    }, {
+      sequelize,
+      modelName: 'Order',
+    });
   ```
 
 - In migration order:
 
   ```js
+        id: {
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+        },
+        rent_date: {
+          type: Sequelize.DATEONLY
+        },
+        return_date: {
+          type: Sequelize.DATEONLY
+        },
         id_user: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
           allowNull: false,
           references: {
             model: 'Users',
@@ -834,122 +895,22 @@ Define associations:
           }
         },
         id_movie: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
           allowNull: false,
           references: {
             model: 'Movies',
             key: 'id'
           }
         },
-  ```
-
-## Genre
-
-Generate Genre model.
-
-TMDB's genre list:
-
-https://developers.themoviedb.org/3/genres/get-movie-list
-
-```js
-sequelize model:generate --name Genre --attributes id_tmdb:integer,name:string
-```
-
-## Actor
-
-Generate Actor model.
-
-```
-sequelize model:create --name Actor --attributes name:string,birthday:dateonly,place_of_birth:string,biography:text,img:string
-```
-
-## MovieGenre
-
-Generate MovieGenre model.
-
-```
-sequelize model:generate --name MovieGenre --attributes id_movie:integer,id_genre:integer
-```
-
-Define associations:
-
-- In model moviegenre.js:
-
-  ```js
-      static associate(models) {
-        // define association here
-        this.belongsTo(models.Movie, {
-            foreignKey: 'id_movie'
-        });
-        this.belongsTo(models.Genre, {
-            foreignKey: 'id_genre'
-        });
-  ```
-
-- In migration:
-
-  ```js
-        id_movie: {
-          type: Sequelize.INTEGER,
+        createdAt: {
           allowNull: false,
-          references: {
-              model: 'Movies',
-              key: 'id'
-          }
+          type: Sequelize.DATE
         },
-        id_genre: {
-          type: Sequelize.INTEGER,
+        updatedAt: {
           allowNull: false,
-          references: {
-              model: 'Genres',
-              key: 'id'
-          }
-        },
-  ```
-
-## MovieActor
-
-Generate MovieActor model.
-
-```js
-sequelize model:generate --name MovieActor --attributes id_movie:integer,id_actor:integer
-```
-
-Define associations:
-
-- In model movieactor.js:
-
-  ```js
-      static associate(models) {
-        // define association here
-        this.belongsTo(models.Movie, {
-          foreignKey: 'id_movie'
-        });
-        this.belongsTo(models.Actor, {
-          foreignKey: 'id_actor'
-        });
-      }
-  ```
-
-- In migration:
-
-  ```js
-        id_movie: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-          references: {
-              model: 'Movies',
-              key: 'id'
-          }
-        },
-        id_actor: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-          references: {
-              model: 'Actors',
-              key: 'id'
-          }
-        },
+          type: Sequelize.DATE
+        }
   ```
 
 ## sequelize create and migrate

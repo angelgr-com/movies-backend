@@ -10,8 +10,12 @@ const PARSERNAME_RESULTS = 10;
 const PARSERNAME_COUNTRY = 'ES';
 
 UsersController.newUser = (req, res) => {
+  let name = req.body.name;
   let username = req.body.username;
   let email = req.body.email;
+  let password = req.body.password;
+  let isDataChecked = false;
+  let dataErrors = false;
 
   const birthdate = newBirthdate();
   randomCity = city[Math.floor(Math.random() * 9) + 0];
@@ -36,9 +40,41 @@ UsersController.newUser = (req, res) => {
   then(userExists => {
     if (userExists != null) {
       res.status(400).send('Username or email already exists. They must be unique.');
-    } 
+    }
     else {
+      if (name.length < 3 || username.length < 3) {
+        console.log('error length');
+        res.status(400).send(`
+        Invalid data. Too short. Please, review and try again.
+        `);
+        dataErrors = true;
+      }
+      if (password.length < 4) {
+        console.log('error length');
+        res.status(400).send(`
+        Invalid data. The minimum password length must be 4.
+        `);
+        dataErrors = true;
+      }
+      else if (!email.includes('@') || !email.includes('.com') ) {
+        console.log('error includes');
+        res.status(400).send(`
+        Invalid email. Please, review and try again.
+        `);
+        dataErrors = true;
+      }
+      else if (!name.match(/^[a-zA-Z_ ]*$/)) {
+        console.log('error numbers');
+        res.status(400).send(`
+        Please use alphabet characters only for name.
+        `);
+        dataErrors = true;
+      }
+      isDataChecked = true;
+    }
+    if (isDataChecked && !dataErrors) {
       try {
+        console.log('create user');
         User.create({
           id: uuidv4(),
           name: req.body.name,
@@ -54,13 +90,13 @@ UsersController.newUser = (req, res) => {
         });
       } catch (error) {
         res.status(400).send(`
-          Incorrect syntax. Please, check your request. ${error}
+          Invalid data. Please, review and try again. ${error}
         `);
       }
     }
   }).
   catch(error => {
-    console.log(error)
+    console.log(error);
   });
 };
 
