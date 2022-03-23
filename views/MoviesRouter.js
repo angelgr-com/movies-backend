@@ -11,10 +11,10 @@ router.get('/actors/:tmdb_id', MoviesController.getActors);
 router.get('/genres', MoviesController.getGenres);
 // http://localhost:5000/movies/
 router.get('/', MoviesController.getAllMovies);
+// http://localhost:5000/movies/add/619264
+router.get('/add/:tmdb_id', MoviesController.saveMovieByID);
 
 // POST ENDPOINTS
-// http://localhost:5000/movies/add/619264
-router.post('/add/:tmdb_id', MoviesController.saveMovieByID);
 // http://localhost:5000/movies/add/
 router.post('/add', MoviesController.saveTopRatedMovies);
 
