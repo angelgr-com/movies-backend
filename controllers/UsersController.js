@@ -133,10 +133,23 @@ UsersController.getUser = (req, res) => {
       where : { username : req.params.username }
     })
     .then(user => {
+      // Obtain the token ID of the user requesting details from a user
+      let requestingUserID = 0;
+      let token = req.headers.authorization.split(" ")[1];
+      jwt.verify(token, process.env.AUTH_SECRET, (err, decoded) => {
+        if(err) {
+          res.status(500).json({ msg: "A problem occurred while decoding the token: ", err });
+        } else {
+          req.user = decoded;
+          requestingUserID = req.user.user.id;
+        }
+      });
+
       if (!User) {
         res.status(400).send("Invalid user");
       }
-      else {
+      // Only send own user details
+      else if (requestingUserID === user.id) {
         const object = {
           name: user.name,
           username: user.username,
@@ -146,6 +159,8 @@ UsersController.getUser = (req, res) => {
           city: user.city,
         };
         res.status(200).send(object);
+      } else {
+        res.status(401).send(`Unauthorized. You can't obtain details from another user`);
       }
     });
   } 
