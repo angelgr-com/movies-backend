@@ -45,28 +45,28 @@ UsersController.newUser = (req, res) => {
       if (name.length < 3 || username.length < 3) {
         console.log('error length');
         res.status(400).send(`
-        Invalid data. Too short. Please, review and try again.
+        Too short.
         `);
         dataErrors = true;
       }
       if (password.length < 4) {
         console.log('error length');
         res.status(400).send(`
-        Invalid data. The minimum password length must be 4.
+        The password must be 4 characters long.
         `);
         dataErrors = true;
       }
       else if (!email.includes('@') || !email.includes('.com') ) {
         console.log('error includes');
         res.status(400).send(`
-        Invalid email. Please, review and try again.
+        Invalid email.
         `);
         dataErrors = true;
       }
       else if (!name.match(/^[a-zA-Z_ ]*$/)) {
         console.log('error numbers');
         res.status(400).send(`
-        Please use alphabet characters only for name.
+        Only alphabet characters for name.
         `);
         dataErrors = true;
       }
